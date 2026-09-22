@@ -34,7 +34,7 @@ import { Icon } from '../../shared/icon/icon';
 import { ResultBanner } from '../../shared/result-banner/result-banner';
 
 /** Brush radius as a fraction of board width, so it scales with the grid. */
-const BRUSH_FRACTION = 0.042;
+const BRUSH_FRACTION = 0.021;
 
 @Component({
   selector: 'app-scratch-page',
