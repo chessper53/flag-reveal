@@ -1,59 +1,58 @@
 # FlagReveal
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
+A flag guessing game with two modes, built with Angular 22. No backend — it is
+a static site.
 
-## Development server
+## Modes
 
-To start a local development server, run:
+**Colour Reveal** — the flag starts blank. You get five guesses, and every
+guess paints in the pixels where its colours match the hidden flag. Guess
+Switzerland against France and France's red band lights up.
 
-```bash
-ng serve
-```
+**Scratch & Guess** — the flag sits under a cover you rub away with the
+pointer. You start at 1000 points and every pixel you uncover costs you, so the
+game is how early you dare to guess.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Both modes are played from the keyboard: type a country, press Enter to guess,
+press Enter again to start the next round.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Running it
 
 ```bash
-ng generate --help
+npm install
+npm start          # http://localhost:4200
+npm run test:ci    # unit tests
 ```
 
-## Building
+Add `?flag=FR` to a game URL to pin the answer to a specific country — handy
+for sharing a round or reproducing a bug.
 
-To build the project run:
+## Regenerating the flag data
+
+Country data and artwork are generated from the MIT-licensed `flag-icons`
+package and committed, so you only need this after changing which countries are
+included:
 
 ```bash
-ng build
+npm run flags:build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Deploying to GitHub Pages
 
-## Running unit tests
+Not enabled yet. When you want it:
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+1. Push the repo to GitHub.
+2. In **Settings → Pages**, set Source to **GitHub Actions**.
+3. Push to `main`; `.github/workflows/deploy.yml` builds and publishes.
 
-```bash
-ng test
-```
+The workflow sets the base href to `/<repo-name>/`. For a user site or custom
+domain, change `BASE_HREF` in the workflow to `/`.
 
-## Running end-to-end tests
+## Docs
 
-For end-to-end (e2e) testing, run:
+[ARCHITECTURE.md](ARCHITECTURE.md) explains how the pixel comparison works and
+where to add a third mode.
 
-```bash
-ng e2e
-```
+## Credits
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Flag artwork: [flag-icons](https://github.com/lipis/flag-icons) (MIT).

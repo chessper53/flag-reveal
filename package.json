@@ -6,7 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:ci": "ng test --watch=false",
+    "flags:build": "node scripts/build-flag-data.mjs",
+    "build:pages": "ng build --base-href $BASE_HREF && node scripts/prepare-pages.mjs"
   },
   "private": true,
   "packageManager": "npm@11.12.1",
@@ -24,9 +27,11 @@
     "@angular/build": "^22.1.8",
     "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^22.1.0",
+    "flag-icons": "^7.5.0",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "vitest": "^4.0.8"
-  }
+  },
+  "description": "A flag guessing game: reveal a flag by matching colours, or scratch the cover off before you guess."
 }

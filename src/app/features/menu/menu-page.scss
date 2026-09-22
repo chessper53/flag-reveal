@@ -1,0 +1,219 @@
+.menu {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 7vw, 5.5rem) 1.25rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 5vw, 3.5rem);
+}
+
+.menu__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  animation: rise 520ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.menu__eyebrow {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+}
+
+.menu__title {
+  font-size: clamp(2.75rem, 9vw, 4.5rem);
+  letter-spacing: -0.04em;
+  background: linear-gradient(120deg, #fff 20%, #9fb6d8 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.menu__title-accent {
+  background: linear-gradient(120deg, #4f9cf9, #2ecc8f 60%, #f5b544);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.menu__lede {
+  max-width: 34rem;
+  color: var(--text-secondary);
+  font-size: clamp(1rem, 2.2vw, 1.1rem);
+  line-height: 1.6;
+}
+
+.menu__modes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu__item {
+  animation: rise 520ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+
+  &:nth-child(2) {
+    animation-delay: 80ms;
+  }
+  &:nth-child(3) {
+    animation-delay: 160ms;
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  height: 100%;
+  padding: 1.6rem;
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  background: linear-gradient(160deg, var(--surface-raised), var(--surface));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--border-subtle));
+    box-shadow:
+      var(--shadow-card),
+      0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+
+    .card__glow {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+}
+
+.card--locked {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Soft accent bloom in the top-right corner of each card. */
+.card__glow {
+  position: absolute;
+  top: -45%;
+  right: -25%;
+  width: 22rem;
+  height: 22rem;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 38%, transparent),
+    transparent 62%
+  );
+  opacity: 0.55;
+  transition:
+    opacity 260ms ease,
+    transform 260ms ease;
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.card__icon {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  font-size: 1.1rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: var(--radius-md);
+}
+
+.card__tagline {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-radius: 999px;
+}
+
+.card__title {
+  font-size: 1.5rem;
+}
+
+.card__description {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin: auto 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+
+  dt {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  dd {
+    margin: 0.15rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: auto 0 0;
+  padding-top: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.menu__footer {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}

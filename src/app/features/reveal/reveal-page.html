@@ -1,0 +1,79 @@
+<div class="page">
+  <header class="page__bar">
+    <a class="btn btn--ghost" routerLink="/"><app-icon name="back" /> Menu</a>
+    <div class="page__titles">
+      <h1 class="page__title">Colour Reveal</h1>
+      <p class="page__subtitle">Matching colours stay on the board</p>
+    </div>
+    <button class="btn btn--ghost" type="button" (click)="playAgain()">
+      <app-icon name="refresh" /> Skip
+    </button>
+  </header>
+
+  <div class="layout">
+    <section class="layout__board">
+      <app-flag-board
+        [flagUrl]="flagUrl()"
+        [mask]="game.mask()"
+        coverStyle="grid"
+        label="Hidden flag, revealed where your guesses matched"
+      />
+
+      <div class="meter" [style.--fill]="revealedPercent()">
+        <div class="meter__bar"><span class="meter__fill"></span></div>
+        <span class="meter__label">{{ revealedPercent() }}% revealed</span>
+      </div>
+    </section>
+
+    <section class="layout__side">
+      @if (game.isOver()) {
+        <app-result-banner
+          [status]="game.status()"
+          [answer]="game.answer()!"
+          [headline]="resultHeadline()"
+          [detail]="resultDetail()"
+          [ready]="canReplay()"
+          (playAgain)="playAgain()"
+        />
+      } @else {
+        <app-country-picker
+          [disabled]="!game.ready() || game.busy()"
+          [focusTrigger]="focusTick()"
+          (picked)="onPicked($event)"
+          (rejected)="onRejected($event)"
+        />
+        @if (notice()) {
+          <p class="notice" role="alert">{{ notice() }}</p>
+        } @else {
+          <p class="notice notice--hint">
+            {{ game.attemptsLeft() }} of {{ maxAttempts }} guesses left
+          </p>
+        }
+      }
+
+      <ol class="guesses">
+        @for (slot of attemptSlots(); track $index) {
+          <li class="guess" [class.guess--empty]="!slot" [class.guess--hit]="slot?.isCorrect">
+            @if (slot) {
+              <span class="guess__index">{{ slot.index }}</span>
+              <span class="guess__name">{{ slot.country.name }}</span>
+              <span class="guess__colors">
+                @for (family of slot.sharedFamilies; track family) {
+                  <i
+                    class="guess__chip"
+                    [style.background]="familyHex(family)"
+                    [title]="familyName(family) + ' matches'"
+                  ></i>
+                }
+              </span>
+              <span class="guess__score">{{ (slot.matchRatio * 100).toFixed(0) }}%</span>
+            } @else {
+              <span class="guess__index">{{ $index + 1 }}</span>
+              <span class="guess__name guess__name--empty">—</span>
+            }
+          </li>
+        }
+      </ol>
+    </section>
+  </div>
+</div>

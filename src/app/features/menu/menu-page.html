@@ -1,0 +1,63 @@
+<div class="menu">
+  <header class="menu__hero">
+    <span class="menu__eyebrow">197 flags · no two rounds alike</span>
+    <h1 class="menu__title">Flag<span class="menu__title-accent">Reveal</span></h1>
+    <p class="menu__lede">
+      Guess the flag pixel by pixel. Pick a mode and start typing — the whole game is played from
+      the keyboard.
+    </p>
+  </header>
+
+  <ul class="menu__modes">
+    @for (mode of modes; track mode.id) {
+      <li class="menu__item" [style.--accent]="mode.accent">
+        <a
+          class="card"
+          [class.card--locked]="!mode.available"
+          [routerLink]="mode.available ? mode.route : null"
+          [attr.aria-disabled]="!mode.available"
+        >
+          <div class="card__glow" aria-hidden="true"></div>
+
+          <div class="card__head">
+            <span class="card__icon"><app-icon [name]="iconFor(mode)" /></span>
+            <span class="card__tagline">{{ mode.tagline }}</span>
+          </div>
+
+          <h2 class="card__title">{{ mode.title }}</h2>
+          <p class="card__description">{{ mode.description }}</p>
+
+          @let stats = summaries().get(mode.id);
+          @if (stats && stats.played > 0) {
+            <dl class="card__stats">
+              <div>
+                <dt>Played</dt>
+                <dd>{{ stats.played }}</dd>
+              </div>
+              <div>
+                <dt>Win rate</dt>
+                <dd>{{ winRate(stats.played, stats.won) }}%</dd>
+              </div>
+              <div>
+                <dt>Streak</dt>
+                <dd>{{ stats.currentStreak }}</dd>
+              </div>
+              @if (stats.bestScore > 0) {
+                <div>
+                  <dt>Best</dt>
+                  <dd>{{ stats.bestScore }}</dd>
+                </div>
+              }
+            </dl>
+          } @else {
+            <span class="card__cta"> Play <app-icon name="enter" /> </span>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+
+  <footer class="menu__footer">
+    <span>Flag artwork from the open-source flag-icons project.</span>
+  </footer>
+</div>

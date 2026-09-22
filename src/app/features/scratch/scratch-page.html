@@ -1,0 +1,96 @@
+<div class="page">
+  <header class="page__bar">
+    <a class="btn btn--ghost" routerLink="/"><app-icon name="back" /> Menu</a>
+    <div class="page__titles">
+      <h1 class="page__title">Scratch &amp; Guess</h1>
+      <p class="page__subtitle">Every pixel you uncover costs you points</p>
+    </div>
+    <button class="btn btn--ghost" type="button" (click)="playAgain()">
+      <app-icon name="refresh" /> Skip
+    </button>
+  </header>
+
+  <div class="layout">
+    <section class="layout__board">
+      <div class="score" [class.score--final]="game.isOver()">
+        <div class="score__value">
+          <span class="score__number">{{
+            game.isOver() ? game.finalScore() : game.potentialScore()
+          }}</span>
+          <span class="score__unit">/ {{ maxScore }}</span>
+        </div>
+        <div class="score__track">
+          <span class="score__fill" [style.width.%]="scorePercent()"></span>
+        </div>
+      </div>
+
+      <app-flag-board
+        [flagUrl]="flagUrl()"
+        [mask]="game.mask()"
+        coverStyle="foil"
+        [interactive]="!game.isOver() && game.ready()"
+        label="Covered flag — drag to rub it away"
+        (scratch)="onScratch($event)"
+      />
+
+      <div
+        class="meter"
+        [style.--fill]="game.isOver() ? finalScratchedPercent() : scratchedPercent()"
+      >
+        <div class="meter__bar"><span class="meter__fill"></span></div>
+        <span class="meter__label">
+          {{ game.isOver() ? finalScratchedPercent() : scratchedPercent() }}% rubbed
+        </span>
+      </div>
+    </section>
+
+    <section class="layout__side">
+      @if (game.isOver()) {
+        <app-result-banner
+          [status]="game.status()"
+          [answer]="game.answer()!"
+          [headline]="resultHeadline()"
+          [detail]="resultDetail()"
+          [ready]="canReplay()"
+          (playAgain)="playAgain()"
+        />
+      } @else {
+        <app-country-picker
+          [disabled]="!game.ready()"
+          [focusTrigger]="focusTick()"
+          (picked)="onPicked($event)"
+          (rejected)="onRejected($event)"
+        />
+        @if (notice()) {
+          <p class="notice" role="alert">{{ notice() }}</p>
+        } @else {
+          <p class="notice notice--hint">
+            Drag across the board to rub · {{ game.attemptsLeft() }} of {{ maxAttempts }} guesses
+            left
+          </p>
+        }
+      }
+
+      @if (game.guesses().length > 0) {
+        <ol class="guesses">
+          @for (guess of game.guesses(); track guess.index) {
+            <li class="guess" [class.guess--hit]="guess.isCorrect">
+              <span class="guess__index">{{ guess.index }}</span>
+              <span class="guess__name">{{ guess.country.name }}</span>
+              <span class="guess__score">{{ guess.isCorrect ? '✓' : '✗' }}</span>
+            </li>
+          }
+        </ol>
+      }
+
+      <aside class="tips">
+        <h2 class="tips__title">Scoring</h2>
+        <ul class="tips__list">
+          <li>Start at {{ maxScore }} and lose points for every pixel uncovered.</li>
+          <li>A wrong guess drops the multiplier to 70%, then 45%.</li>
+          <li>Three wrong guesses end the round at zero.</li>
+        </ul>
+      </aside>
+    </section>
+  </div>
+</div>

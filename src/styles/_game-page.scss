@@ -1,0 +1,188 @@
+/**
+ * Chrome shared by the mode pages: top bar, two-column layout, reveal meter,
+ * notices. Both pages `@use` this so they stay visually identical apart from
+ * their accent colour and their own mode-specific bits.
+ */
+
+.page {
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3vw, 2.5rem) 1.25rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.page__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page__titles {
+  text-align: center;
+}
+
+.page__title {
+  font-size: clamp(1.1rem, 3vw, 1.4rem);
+}
+
+.page__subtitle {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(19rem, 1fr);
+  gap: clamp(1.25rem, 3vw, 2rem);
+  align-items: start;
+
+  @media (max-width: 58rem) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.layout__board,
+.layout__side {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* Progress meter under the board. */
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.meter__bar {
+  flex: 1;
+  height: 0.4rem;
+  background: var(--surface-raised);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.meter__fill {
+  display: block;
+  width: calc(var(--fill, 0) * 1%);
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 70%, transparent),
+    var(--accent)
+  );
+  border-radius: inherit;
+  transition: width 320ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.meter__label {
+  flex: none;
+  min-width: 7.5rem;
+  text-align: right;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.notice {
+  min-height: 1.2rem;
+  font-size: 0.85rem;
+  color: var(--warning);
+}
+
+.notice--hint {
+  color: var(--text-faint);
+}
+
+/* Guess list. */
+.guesses {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guess {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  animation: guess-in 240ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.guess--empty {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--border-subtle);
+  animation: none;
+}
+
+.guess--hit {
+  border-color: color-mix(in srgb, var(--success) 55%, transparent);
+  background: color-mix(in srgb, var(--success) 12%, var(--surface-raised));
+}
+
+.guess__index {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  background: var(--surface-sunken);
+  border-radius: 50%;
+}
+
+.guess__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+.guess__name--empty {
+  color: var(--text-faint);
+}
+
+.guess__colors {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.guess__chip {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22);
+}
+
+.guess__score {
+  flex: none;
+  min-width: 2.6rem;
+  text-align: right;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+@keyframes guess-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+}

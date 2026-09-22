@@ -1,0 +1,81 @@
+@use '../../../styles/game-page';
+
+:host {
+  --accent: #f5b544;
+  display: block;
+}
+
+.score {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 1.1rem;
+  background: linear-gradient(135deg, var(--surface-raised), var(--surface));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.score--final {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.score__value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.score__number {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-weight: 680;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  // Tick smoothly as the score falls rather than flickering per pixel rubbed.
+  transition: color 200ms ease;
+}
+
+.score__unit {
+  font-size: 0.85rem;
+  color: var(--text-faint);
+}
+
+.score__track {
+  height: 0.35rem;
+  background: var(--surface-sunken);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.score__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #f5b544, #ff8a5b);
+  border-radius: inherit;
+  transition: width 160ms linear;
+}
+
+.tips {
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.tips__title {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.tips__list {
+  margin: 0.6rem 0 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}

@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.board {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface-sunken);
+  box-shadow:
+    0 0 0 1px var(--border-subtle),
+    0 26px 60px -28px rgb(0 0 0 / 0.85),
+    inset 0 1px 0 rgb(255 255 255 / 0.04);
+  transition: box-shadow 220ms ease;
+}
+
+.board--interactive {
+  cursor: crosshair;
+  touch-action: none;
+
+  &:hover {
+    box-shadow:
+      0 0 0 1px var(--border-strong),
+      0 30px 70px -26px rgb(0 0 0 / 0.9);
+  }
+}
+
+.board__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.board__loading {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: linear-gradient(to top, rgb(9 11 17 / 0.9), transparent);
+}
