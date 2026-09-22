@@ -15,6 +15,8 @@ export enum GameModeId {
   Reveal = 'reveal',
   /** Rub the board open with the cursor; the more you uncover, the less you score. */
   Scratch = 'scratch',
+  /** The flag as a coarse mosaic that sharpens one step per wrong guess. */
+  Mosaic = 'mosaic',
 }
 
 /** Menu metadata for a mode. */
@@ -108,6 +110,18 @@ export const SCRATCH_MAX_ATTEMPTS = 3;
 export const SCRATCH_ROUNDS_PER_SESSION = 3;
 
 export const SCRATCH_MAX_SESSION_SCORE = SCRATCH_MAX_SCORE * SCRATCH_ROUNDS_PER_SESSION;
+
+/**
+ * The Mosaic ladder: how many blocks wide the flag is drawn, per guess spent.
+ *
+ * Deliberately unfair at the top — two blocks is barely a colour scheme — and
+ * it never reaches a resolution where the flag is simply legible. The last
+ * rung is still a 12-block smear, so the final guess should cost you something
+ * to make. Length of this array is the number of attempts.
+ */
+export const MOSAIC_STEPS: readonly number[] = [2, 3, 5, 8, 12];
+
+export const MOSAIC_MAX_ATTEMPTS = MOSAIC_STEPS.length;
 
 /** What one finished round contributed to the session. */
 export interface SessionRound {

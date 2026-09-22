@@ -1,0 +1,66 @@
+:host {
+  --accent: #9b7bf0;
+  display: block;
+}
+
+/* The ladder of block counts, under the board. */
+.ladder {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ladder__rung {
+  flex: 1;
+  padding: 0.45rem 0;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.ladder__rung--spent {
+  color: var(--text-muted);
+  background: var(--surface-raised);
+}
+
+.ladder__rung--current {
+  color: #05070c;
+  background: var(--accent);
+  border-color: transparent;
+}
+
+.tips {
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.tips__title {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.tips__list {
+  margin: 0.6rem 0 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}

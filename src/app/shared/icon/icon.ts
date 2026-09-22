@@ -10,10 +10,11 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 export type IconName =
-  'grid' | 'brush' | 'back' | 'refresh' | 'flag' | 'trophy' | 'close' | 'enter';
+  'grid' | 'mosaic' | 'brush' | 'back' | 'refresh' | 'flag' | 'trophy' | 'close' | 'enter';
 
 const PATHS: Record<IconName, string> = {
   grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  mosaic: 'M4 4h9v9H4zM15 4h5v5h-5zM15 11h5v9h-5zM4 15h9v5H4z',
   brush: 'M4 20c3 1 5-1 5-3.5M9.5 16.5 19 7a2.1 2.1 0 0 0-3-3L6.5 13.5M4 20a2.5 2.5 0 0 1 2.5-6.5',
   back: 'M15 5l-7 7 7 7',
   refresh: 'M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5',

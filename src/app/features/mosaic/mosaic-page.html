@@ -1,0 +1,88 @@
+<div class="page">
+  <header class="page__bar">
+    <a class="btn btn--ghost" routerLink="/"><app-icon name="back" /> Menu</a>
+    <div class="page__titles">
+      <h1 class="page__title">Mosaic Ladder</h1>
+      <p class="page__subtitle">Every country is in play</p>
+    </div>
+    <button class="btn btn--ghost" type="button" (click)="playAgain()">
+      <app-icon name="refresh" /> Skip
+    </button>
+  </header>
+
+  <div class="layout">
+    <section class="layout__board">
+      <app-flag-board
+        [flagUrl]="flagUrl()"
+        [mask]="mask"
+        [mosaicColumns]="mosaicColumns()"
+        coverStyle="grid"
+        label="A flag drawn as coarse blocks"
+      />
+
+      <ol class="ladder" aria-label="Mosaic ladder">
+        @for (rung of steps; track rung; let i = $index) {
+          <li
+            class="ladder__rung"
+            [class.ladder__rung--spent]="i < game.attemptsUsed()"
+            [class.ladder__rung--current]="!game.isOver() && i === game.attemptsUsed()"
+          >
+            {{ rung }}
+          </li>
+        }
+      </ol>
+    </section>
+
+    <section class="layout__side">
+      @if (game.isOver()) {
+        <app-result-banner
+          [status]="game.status()"
+          [answer]="game.answer()!"
+          [headline]="resultHeadline()"
+          [detail]="resultDetail()"
+          [ready]="canReplay()"
+          (playAgain)="playAgain()"
+        />
+      } @else {
+        <app-country-picker
+          [disabled]="!game.ready()"
+          [focusTrigger]="focusTick()"
+          (picked)="onPicked($event)"
+          (rejected)="onRejected($event)"
+        />
+        @if (notice()) {
+          <p class="notice" role="alert">{{ notice() }}</p>
+        } @else {
+          <p class="notice notice--hint">
+            {{ game.columns() }} blocks wide · {{ game.attemptsLeft() }} of
+            {{ maxAttempts }} guesses left
+          </p>
+        }
+      }
+
+      <ol class="guesses">
+        @for (slot of attemptSlots(); track $index) {
+          <li class="guess" [class.guess--empty]="!slot" [class.guess--hit]="slot?.isCorrect">
+            @if (slot) {
+              <span class="guess__index">{{ slot.index }}</span>
+              <span class="guess__name">{{ slot.country.name }}</span>
+              <span class="guess__score">{{ slot.isCorrect ? '✓' : '✗' }}</span>
+            } @else {
+              <span class="guess__index">{{ $index + 1 }}</span>
+              <span class="guess__name guess__name--empty">—</span>
+            }
+          </li>
+        }
+      </ol>
+
+      <aside class="tips">
+        <h2 class="tips__title">How it works</h2>
+        <ul class="tips__list">
+          <li>The flag starts as {{ steps[0] }} blocks across — a colour scheme, not a flag.</li>
+          <li>Each wrong guess sharpens it one rung, up to {{ steps[steps.length - 1] }}.</li>
+          <li>It never gets sharp enough to be easy. All 197 countries can come up.</li>
+        </ul>
+      </aside>
+    </section>
+  </div>
+</div>

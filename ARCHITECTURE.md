@@ -75,12 +75,14 @@ src/app/
 │   │   ├── country.service.ts   # Lookup, fuzzy search, random answer
 │   │   ├── reveal-game.service.ts   # Reveal mode rules + state
 │   │   ├── scratch-game.service.ts  # Scratch mode rules + state
+│   │   ├── mosaic-game.service.ts   # Mosaic mode rules + state
 │   │   └── stats.service.ts     # localStorage-backed stats
 │   └── util/board-mask.ts       # The visibility mask shared by both modes
 ├── features/                    # One folder per page, lazily routed.
 │   ├── menu/                    # Mode cards + lifetime stats
 │   ├── reveal/                  # Colour Reveal page
-│   └── scratch/                 # Scratch & Guess page + session summary
+│   ├── scratch/                 # Scratch & Guess page + session summary
+│   └── mosaic/                  # Mosaic Ladder page
 └── shared/                      # Reusable presentational components.
     ├── flag-board/              # The canvas playfield
     ├── country-picker/          # Autocomplete with flag previews
@@ -123,6 +125,14 @@ They differ only in what makes a cell visible:
 | ------- | ------------------------------------------ | --------------------------------------------------------------- |
 | Reveal  | `guess.families[i] === answer.families[i]` | 5 attempts, win or lose                                         |
 | Scratch | the pointer passed within the brush radius | `1000 × (1 − rubbed) × multiplier`, multiplier `1 / 0.7 / 0.45` |
+| Mosaic  | nothing is hidden; the flag is *blurred*   | 5 attempts, win or lose                                         |
+
+Mosaic is the odd one out and worth understanding before extending it. It
+hides nothing — the whole flag is on screen from the first second — so it uses
+no mask and needs no rasterised grid at all. What it manipulates is
+*resolution*: the flag is drawn as `MOSAIC_STEPS[attemptsUsed]` blocks across,
+and a wrong guess buys one rung. It is also the only mode that draws its
+answers from every tier, which is most of what makes it hard.
 
 `ScratchGameService` additionally tracks a **session**: three rounds, then one
 combined score out of 3000. It therefore has two lifetimes — the round (mask,
@@ -141,7 +151,10 @@ round) is what `StatsService.recordSession()` keeps as a personal best.
 Purely presentational: it takes a `flagUrl` and a `mask` and emits `scratch`
 events in **cell coordinates**, leaving the page to decide what that means.
 
-Each frame composites three canvases:
+It has two render paths. With `mosaicColumns` set it downsamples the flag to
+that many blocks (smoothing **on**, so each block is the honest average of the
+area it covers) and scales it back up with smoothing **off** so the blocks stay
+hard-edged; the mask is ignored. Otherwise it composites three canvases:
 
 1. `maskCanvas` (128 × 96) — one alpha value per cell, holding the animation.
 2. `flagCanvas` (full size) — the SVG, then `destination-in` the upscaled mask.
@@ -199,12 +212,13 @@ over the same window.
 | `REVEAL_MAX_ATTEMPTS`                | `game.model.ts`         | Guesses in Reveal                  |
 | `SCRATCH_MAX_SCORE`, multipliers     | `game.model.ts`, engine | Scratch scoring curve              |
 | `SCRATCH_ROUNDS_PER_SESSION`         | `game.model.ts`         | Flags per Scratch session          |
+| `MOSAIC_STEPS`                       | `game.model.ts`         | Mosaic ladder + attempt count      |
 | `BRUSH_RADIUS_CELLS`                 | `scratch-page.ts`       | Rub size; 2 cells ≈ 1 point a tap  |
 | `REVEAL_GRACE_MS`                    | `replay-arming.ts`      | How long the answer holds the screen|
 | `EASY` / `MEDIUM` tier lists         | `build-flag-data.mjs`   | Which flags can be answers         |
 
-Answer pools are `[Tier.Easy, Tier.Medium]` in both engines — the autocomplete
-still offers all 197 countries.
+Answer pools are `[Tier.Easy, Tier.Medium]` in Reveal and Scratch, and all
+three tiers in Mosaic. The autocomplete always offers all 197 countries.
 
 ---
 

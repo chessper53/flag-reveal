@@ -21,5 +21,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/scratch/scratch-page').then((m) => m.ScratchPage),
     title: 'Scratch & Guess — FlagReveal',
   },
+  {
+    path: 'play/mosaic',
+    loadComponent: () => import('./features/mosaic/mosaic-page').then((m) => m.MosaicPage),
+    title: 'Mosaic Ladder — FlagReveal',
+  },
   { path: '**', redirectTo: '' },
 ];

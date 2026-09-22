@@ -32,4 +32,15 @@ export const GAME_MODES: readonly GameModeDescriptor[] = [
     available: true,
     accent: '#f5b544',
   },
+  {
+    id: GameModeId.Mosaic,
+    title: 'Mosaic Ladder',
+    tagline: 'Hard · 5 guesses',
+    description:
+      'The flag is drawn as two enormous blocks and sharpens one rung with every wrong guess — but never enough to be readable. Every country in the world is in play.',
+    icon: 'mosaic',
+    route: '/play/mosaic',
+    available: true,
+    accent: '#9b7bf0',
+  },
 ];

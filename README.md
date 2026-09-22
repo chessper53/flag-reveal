@@ -14,7 +14,11 @@ pointer. You start at 1000 points and every press you rub costs about one, so
 the game is how early you dare to guess. Played in sessions of three flags, for
 a combined score out of 3000.
 
-Both modes are played from the keyboard: type a country, press Enter to guess,
+**Mosaic Ladder** — the hard one. The flag is drawn as two enormous blocks and
+sharpens one rung per wrong guess (2 → 3 → 5 → 8 → 12 blocks), never far enough
+to be readable. Every one of the 197 countries can come up.
+
+All modes are played from the keyboard: type a country, press Enter to guess,
 press Enter again to start the next round.
 
 ## Running it

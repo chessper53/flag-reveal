@@ -73,6 +73,11 @@ export class FlagBoard {
   /** Which cells are visible. */
   readonly mask = input<Mask>(emptyMask());
   readonly coverStyle = input<CoverStyle>('grid');
+  /**
+   * When set, the whole flag is drawn as this many blocks across and the mask
+   * is ignored. This is Mosaic mode: the flag is not hidden, just unreadable.
+   */
+  readonly mosaicColumns = input<number | null>(null);
   /** When true, pointer drags emit {@link scratch} events. */
   readonly interactive = input(false);
   /** Accessible description of the board's current state. */
@@ -142,6 +147,7 @@ export class FlagBoard {
       this.mask();
       this.coverStyle();
       this.flagUrl();
+      this.mosaicColumns();
       this.viewReady = true;
       this.resizeCanvas();
       this.startAnimation();
@@ -286,10 +292,48 @@ export class FlagBoard {
       return;
     }
 
+    const columns = this.mosaicColumns();
+    if (columns !== null) {
+      this.paintMosaic(context, canvas, image, columns);
+      return;
+    }
+
     const masked = this.paintMaskedFlag(image, canvas.width, canvas.height);
     if (masked) {
       context.drawImage(masked, 0, 0);
     }
+  }
+
+  /**
+   * Draws the flag as `columns` blocks across.
+   *
+   * Two passes: down to block resolution with smoothing on, so each block is
+   * the *average* of the area it covers rather than one arbitrary pixel, then
+   * back up with smoothing off so the blocks stay hard-edged. Averaging is
+   * what makes the mosaic fair — the blocks are an honest summary of the flag
+   * instead of a lucky sample.
+   */
+  private paintMosaic(
+    context: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    image: HTMLImageElement,
+    columns: number,
+  ): void {
+    const rows = Math.max(1, Math.round((columns * GRID_HEIGHT) / GRID_WIDTH));
+    const small = this.flagCanvas;
+    const smallContext = small.getContext('2d');
+    if (!smallContext) {
+      return;
+    }
+
+    smallContext.clearRect(0, 0, small.width, small.height);
+    smallContext.imageSmoothingEnabled = true;
+    smallContext.imageSmoothingQuality = 'high';
+    smallContext.drawImage(image, 0, 0, columns, rows);
+
+    context.imageSmoothingEnabled = false;
+    context.drawImage(small, 0, 0, columns, rows, 0, 0, canvas.width, canvas.height);
+    context.imageSmoothingEnabled = true;
   }
 
   /**
