@@ -33,8 +33,15 @@ import { CountryPicker } from '../../shared/country-picker/country-picker';
 import { Icon } from '../../shared/icon/icon';
 import { ResultBanner } from '../../shared/result-banner/result-banner';
 
-/** Brush radius as a fraction of board width, so it scales with the grid. */
-const BRUSH_FRACTION = 0.021;
+/**
+ * Brush radius in cells, expressed against the grid width so it survives a
+ * change of resolution.
+ *
+ * Sized so one tap costs one point: a radius-2 disc covers ~13 of the 12 288
+ * cells, or ~0.1% of the board, which is 1 point of the 1000 on offer.
+ */
+const BRUSH_RADIUS_CELLS = 2;
+const BRUSH_FRACTION = BRUSH_RADIUS_CELLS / 128;
 
 @Component({
   selector: 'app-scratch-page',
