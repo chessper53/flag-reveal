@@ -124,3 +124,28 @@
     transform: translateY(12px) scale(0.985);
   }
 }
+
+/**
+ * On a phone the summary is the last thing on screen and there is no keyboard
+ * up, so its button is the only way on. Tighten the spacing enough to keep
+ * that button above the fold.
+ */
+@media (max-width: 34rem) {
+  .summary {
+    gap: 0.7rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .summary__total {
+    font-size: 2rem;
+  }
+
+  .summary__round {
+    padding: 0.4rem 0.55rem;
+  }
+
+  .summary__flag {
+    width: 1.8rem;
+    height: 1.35rem;
+  }
+}

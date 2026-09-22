@@ -199,3 +199,50 @@
     transform: translateX(8px);
   }
 }
+
+/**
+ * Phone layout.
+ *
+ * The header is the pinch point: three items across a 390px viewport makes the
+ * title wrap and collide with the buttons. The subtitle is flavour text, so it
+ * goes first, and the buttons tighten up. Empty guess slots are dropped too —
+ * they cost five rows of screen to say something the hint line already says.
+ */
+@media (max-width: 34rem) {
+  .page {
+    padding-top: 0.9rem;
+    gap: 1rem;
+  }
+
+  .page__bar {
+    gap: 0.35rem;
+  }
+
+  .page__subtitle {
+    display: none;
+  }
+
+  .page__title {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  /* Keep the header buttons at a comfortable 44px thumb target. */
+  .page__bar .btn {
+    padding: 0.7rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  /* Nothing should drop below ~11px on a phone. */
+  .page__badge {
+    font-size: 0.7rem;
+  }
+
+  .guess--empty {
+    display: none;
+  }
+
+  .meter__label {
+    min-width: 0;
+  }
+}
