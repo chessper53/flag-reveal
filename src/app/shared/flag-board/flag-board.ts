@@ -91,6 +91,8 @@ export class FlagBoard {
 
   private image: HTMLImageElement | null = null;
   private coverPattern: CanvasPattern | null = null;
+  /** The canvas only exists after the first render; guards early draws. */
+  private viewReady = false;
 
   /** Cell-resolution alpha mask, upscaled onto the flag each frame. */
   private readonly maskCanvas = createCanvas(GRID_WIDTH, GRID_HEIGHT);
@@ -114,6 +116,14 @@ export class FlagBoard {
     effect(() => {
       const url = this.flagUrl();
       this.image = null;
+      // A finished round leaves every cell at full opacity. Clear that before
+      // the next flag arrives, or the new artwork would be painted visible for
+      // the frames before its mask is applied. Repaint at once so the previous
+      // round's flag does not linger on the canvas for a frame either.
+      this.alpha.fill(0);
+      if (this.viewReady) {
+        this.draw();
+      }
       if (!url) {
         return;
       }
@@ -132,6 +142,7 @@ export class FlagBoard {
       this.mask();
       this.coverStyle();
       this.flagUrl();
+      this.viewReady = true;
       this.resizeCanvas();
       this.startAnimation();
     });
@@ -230,7 +241,14 @@ export class FlagBoard {
     this.animationHandle = requestAnimationFrame(step);
   }
 
-  /** Moves cell opacities towards the mask. Returns true once nothing moves. */
+  /**
+   * Moves cell opacities towards the mask. Returns true once nothing moves.
+   *
+   * Revealing fades in; hiding is instant. Animating a cell *out* would mean
+   * showing the flag underneath while it faded, which is exactly what must
+   * never happen — a new round hides everything at once, so any fade-out would
+   * flash the next answer.
+   */
   private advance(deltaMs: number): boolean {
     const mask = this.mask();
     const stepSize = this.reducedMotion() ? 1 : Math.min(1, deltaMs / FADE_DURATION_MS);
@@ -242,8 +260,13 @@ export class FlagBoard {
       if (current === target) {
         continue;
       }
-      const next = current + Math.sign(target - current) * stepSize;
-      this.alpha[i] = Math.abs(next - target) < 0.02 ? target : next;
+      if (target < current) {
+        this.alpha[i] = target;
+        settled = false;
+        continue;
+      }
+      const next = current + stepSize;
+      this.alpha[i] = next >= target - 0.02 ? target : next;
       settled = false;
     }
     return settled;
