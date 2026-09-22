@@ -5,6 +5,7 @@ import { Continent, Country, FlagGrid, Tier } from '../models/flag.model';
 import { RoundStatus } from '../models/game.model';
 import { GRID_CELLS, GRID_WIDTH, FlagGridService } from './flag-grid.service';
 import { RevealGameService } from './reveal-game.service';
+import { SettingsService } from './settings.service';
 
 /**
  * Builds a flag of vertical bands from colour families, so tests can express
@@ -143,5 +144,46 @@ describe('RevealGameService', () => {
   it('reports the colour families the guess shares with the answer', async () => {
     await game.submit(country('AT', 'Austria'));
     expect(game.guesses()[0].sharedFamilies).toEqual([ColorFamily.Red]);
+  });
+});
+
+/** Serves the same grid for any code, so rounds can be dealt at random. */
+class AnyGridService {
+  private readonly grid = bandedGrid(ColorFamily.Blue, ColorFamily.White, ColorFamily.Red);
+
+  load(): Promise<FlagGrid> {
+    return Promise.resolve(this.grid);
+  }
+  peek(): undefined {
+    return undefined;
+  }
+  preload(): void {}
+}
+
+describe('RevealGameService answer pool', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    TestBed.configureTestingModule({
+      providers: [{ provide: FlagGridService, useClass: AnyGridService }],
+    });
+  });
+
+  it('keeps obscure countries out of the pool unless hard mode is on', async () => {
+    const game = TestBed.inject(RevealGameService);
+
+    const normalTiers = new Set<Tier>();
+    for (let i = 0; i < 300; i++) {
+      await game.newRound();
+      normalTiers.add(game.answer()!.tier);
+    }
+    expect(normalTiers.has(Tier.Hard)).toBe(false);
+
+    TestBed.inject(SettingsService).setHardMode(true);
+    const hardTiers = new Set<Tier>();
+    for (let i = 0; i < 300; i++) {
+      await game.newRound();
+      hardTiers.add(game.answer()!.tier);
+    }
+    expect(hardTiers.has(Tier.Hard)).toBe(true);
   });
 });

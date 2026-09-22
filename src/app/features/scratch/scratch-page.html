@@ -3,6 +3,9 @@
     <a class="btn btn--ghost" routerLink="/"><app-icon name="back" /> Menu</a>
     <div class="page__titles">
       <h1 class="page__title">Scratch &amp; Guess</h1>
+      @if (settings.hardMode()) {
+        <span class="page__badge">Hard</span>
+      }
       <p class="page__subtitle">Three flags · best combined score wins</p>
     </div>
     <button class="btn btn--ghost" type="button" (click)="restartSession()">
@@ -84,6 +87,7 @@
         />
       } @else {
         <app-country-picker
+          [showPreviews]="!settings.hardMode()"
           [disabled]="!game.ready()"
           [focusTrigger]="focusTick()"
           (picked)="onPicked($event)"

@@ -8,6 +8,23 @@
     </p>
   </header>
 
+  <button
+    type="button"
+    class="hard"
+    role="switch"
+    [attr.aria-checked]="settings.hardMode()"
+    [class.hard--on]="settings.hardMode()"
+    (click)="settings.toggleHardMode()"
+  >
+    <span class="hard__track"><span class="hard__thumb"></span></span>
+    <span class="hard__text">
+      <span class="hard__title">Hard mode</span>
+      <span class="hard__detail">
+        No flag previews in the dropdown — you have to know the name. Every country can come up.
+      </span>
+    </span>
+  </button>
+
   <ul class="menu__modes">
     @for (mode of modes; track mode.id) {
       <li class="menu__item" [style.--accent]="mode.accent">

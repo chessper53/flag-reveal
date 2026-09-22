@@ -3,6 +3,9 @@
     <a class="btn btn--ghost" routerLink="/"><app-icon name="back" /> Menu</a>
     <div class="page__titles">
       <h1 class="page__title">Mosaic Ladder</h1>
+      @if (settings.hardMode()) {
+        <span class="page__badge">Hard</span>
+      }
       <p class="page__subtitle">Every country is in play</p>
     </div>
     <button class="btn btn--ghost" type="button" (click)="playAgain()">
@@ -45,6 +48,7 @@
         />
       } @else {
         <app-country-picker
+          [showPreviews]="!settings.hardMode()"
           [disabled]="!game.ready()"
           [focusTrigger]="focusTick()"
           (picked)="onPicked($event)"

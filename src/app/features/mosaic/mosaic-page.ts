@@ -24,6 +24,7 @@ import {
   RoundStatus,
 } from '../../core/models/game.model';
 import { CountryService } from '../../core/services/country.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { MosaicGameService } from '../../core/services/mosaic-game.service';
 import { createReplayArming } from '../../core/util/replay-arming';
 import { fullMask } from '../../core/util/board-mask';
@@ -47,6 +48,7 @@ export class MosaicPage implements OnInit {
 
   private readonly route = inject(ActivatedRoute);
   private readonly countries = inject(CountryService);
+  protected readonly settings = inject(SettingsService);
 
   protected readonly canReplay = createReplayArming(this.game.isOver);
   protected readonly notice = signal('');

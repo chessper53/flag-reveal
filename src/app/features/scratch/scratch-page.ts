@@ -19,6 +19,7 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Country, flagAssetUrl } from '../../core/models/flag.model';
 import { CountryService } from '../../core/services/country.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { createReplayArming } from '../../core/util/replay-arming';
 import {
   GuessRejection,
@@ -69,6 +70,7 @@ export class ScratchPage implements OnInit {
 
   private readonly route = inject(ActivatedRoute);
   private readonly countries = inject(CountryService);
+  protected readonly settings = inject(SettingsService);
 
   /**
    * Artwork for the board. Only set once the answer's grid is rasterised, so

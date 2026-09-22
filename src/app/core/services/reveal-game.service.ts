@@ -23,16 +23,22 @@ import {
 import { Mask, emptyMask, fullMask, maskRatio } from '../util/board-mask';
 import { CountryService } from './country.service';
 import { FlagGridService } from './flag-grid.service';
+import { SettingsService } from './settings.service';
 import { StatsService } from './stats.service';
 
-/** Tiers the Reveal answer is drawn from. */
-const ANSWER_TIERS = [Tier.Easy, Tier.Medium] as const;
+/**
+ * Tiers the answer is drawn from. Hard mode opens the pool to every country
+ * in the catalogue instead of the ones most players can name on sight.
+ */
+const NORMAL_TIERS = [Tier.Easy, Tier.Medium] as const;
+const HARD_TIERS = [Tier.Easy, Tier.Medium, Tier.Hard] as const;
 
 @Injectable({ providedIn: 'root' })
 export class RevealGameService {
   private readonly countries = inject(CountryService);
   private readonly grids = inject(FlagGridService);
   private readonly stats = inject(StatsService);
+  private readonly settings = inject(SettingsService);
 
   private readonly answerState = signal<Country | null>(null);
   private readonly answerGridState = signal<FlagGrid | null>(null);
@@ -64,7 +70,8 @@ export class RevealGameService {
    */
   async newRound(forced?: Country): Promise<void> {
     const seen = this.stats.statsFor(GameModeId.Reveal).seenAnswers;
-    const answer = forced ?? this.countries.randomAnswer([...ANSWER_TIERS], seen);
+    const tiers = this.settings.hardMode() ? HARD_TIERS : NORMAL_TIERS;
+    const answer = forced ?? this.countries.randomAnswer([...tiers], seen);
 
     this.answerState.set(answer);
     this.answerGridState.set(null);

@@ -28,6 +28,19 @@
   font-size: clamp(1.1rem, 3vw, 1.4rem);
 }
 
+.page__badge {
+  display: inline-block;
+  margin-bottom: 0.2rem;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  border-radius: 999px;
+}
+
 .page__subtitle {
   margin-top: 0.15rem;
   font-size: 0.8rem;

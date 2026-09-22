@@ -19,6 +19,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FAMILY_INFO } from '../../core/models/color.model';
 import { Country, flagAssetUrl } from '../../core/models/flag.model';
 import { CountryService } from '../../core/services/country.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { createReplayArming } from '../../core/util/replay-arming';
 import { GuessRejection, REVEAL_MAX_ATTEMPTS, RoundStatus } from '../../core/models/game.model';
 import { RevealGameService } from '../../core/services/reveal-game.service';
@@ -41,6 +42,7 @@ export class RevealPage implements OnInit {
 
   private readonly route = inject(ActivatedRoute);
   private readonly countries = inject(CountryService);
+  protected readonly settings = inject(SettingsService);
 
   /** Transient message under the input ("already guessed", "no such country"). */
   /**

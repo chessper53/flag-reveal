@@ -175,6 +175,21 @@ and ranks prefix hits above substring hits. Enter takes the highlighted
 suggestion, or resolves the typed text when it is unambiguous — which is what
 lets a round be played entirely by typing.
 
+### Hard mode
+
+`SettingsService` holds one persisted flag that two things read:
+
+- **The autocomplete drops its flag previews** (`CountryPicker.showPreviews`).
+  This is the substantive half. With thumbnails you can type a letter and match
+  pictures against the board without recalling which flag belongs to which
+  country — a spot-the-difference game rather than a memory one. Without them
+  you have to know the name.
+- **Reveal and Scratch open their answer pool to every tier**, matching what
+  Mosaic always does.
+
+If you add a mode, pass `[showPreviews]="!settings.hardMode()"` to the picker
+and honour the pool convention, or the setting will silently do nothing there.
+
 ---
 
 ## 5. Adding a third mode
@@ -217,8 +232,9 @@ over the same window.
 | `REVEAL_GRACE_MS`                    | `replay-arming.ts`      | How long the answer holds the screen|
 | `EASY` / `MEDIUM` tier lists         | `build-flag-data.mjs`   | Which flags can be answers         |
 
-Answer pools are `[Tier.Easy, Tier.Medium]` in Reveal and Scratch, and all
-three tiers in Mosaic. The autocomplete always offers all 197 countries.
+Answer pools are `[Tier.Easy, Tier.Medium]` in Reveal and Scratch (all three
+tiers when hard mode is on), and always all three in Mosaic. The autocomplete
+always offers all 197 countries.
 
 ---
 

@@ -81,13 +81,17 @@ const MAX_SUGGESTIONS = 7;
               (click)="choose(match.country)"
               (mouseenter)="activeIndex.set(i)"
             >
-              <img
-                class="picker__flag"
-                [src]="flagUrl(match.country)"
-                [alt]="''"
-                loading="lazy"
-                decoding="async"
-              />
+              @if (showPreviews()) {
+                <img
+                  class="picker__flag"
+                  [src]="flagUrl(match.country)"
+                  [alt]="''"
+                  loading="lazy"
+                  decoding="async"
+                />
+              } @else {
+                <span class="picker__code">{{ match.country.code }}</span>
+              }
               <span class="picker__name">{{ match.country.name }}</span>
               <span class="picker__continent">{{ match.country.continent }}</span>
             </li>
@@ -105,6 +109,12 @@ export class CountryPicker {
 
   readonly placeholder = input('Guess a country…');
   readonly disabled = input(false);
+  /**
+   * Flag thumbnails beside each suggestion. Hard mode turns these off: with
+   * them, the list can be matched against the board by eye instead of from
+   * memory, which is a different (and much easier) game.
+   */
+  readonly showPreviews = input(true);
   /** Focus the input whenever this value changes (a new round, say). */
   readonly focusTrigger = input<unknown>(null);
 

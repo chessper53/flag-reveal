@@ -18,6 +18,10 @@ a combined score out of 3000.
 sharpens one rung per wrong guess (2 → 3 → 5 → 8 → 12 blocks), never far enough
 to be readable. Every one of the 197 countries can come up.
 
+**Hard mode** (toggle on the menu) strips the flag previews out of the
+autocomplete, so you have to know a country by name rather than matching
+thumbnails against the board, and opens the answer pool to every country.
+
 All modes are played from the keyboard: type a country, press Enter to guess,
 press Enter again to start the next round.
 

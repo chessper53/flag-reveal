@@ -9,6 +9,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { RouterLink } from '@angular/router';
 import { GAME_MODES } from '../../core/data/modes';
 import { GameModeDescriptor } from '../../core/models/game.model';
+import { SettingsService } from '../../core/services/settings.service';
 import { StatsService } from '../../core/services/stats.service';
 import { Icon, IconName } from '../../shared/icon/icon';
 
@@ -21,6 +22,7 @@ import { Icon, IconName } from '../../shared/icon/icon';
 })
 export class MenuPage {
   private readonly stats = inject(StatsService);
+  protected readonly settings = inject(SettingsService);
 
   protected readonly modes = GAME_MODES;
 

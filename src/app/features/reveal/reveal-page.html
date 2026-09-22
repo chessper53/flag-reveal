@@ -3,6 +3,9 @@
     <a class="btn btn--ghost" routerLink="/"><app-icon name="back" /> Menu</a>
     <div class="page__titles">
       <h1 class="page__title">Colour Reveal</h1>
+      @if (settings.hardMode()) {
+        <span class="page__badge">Hard</span>
+      }
       <p class="page__subtitle">Matching colours stay on the board</p>
     </div>
     <button class="btn btn--ghost" type="button" (click)="playAgain()">
@@ -37,6 +40,7 @@
         />
       } @else {
         <app-country-picker
+          [showPreviews]="!settings.hardMode()"
           [disabled]="!game.ready() || game.busy()"
           [focusTrigger]="focusTick()"
           (picked)="onPicked($event)"

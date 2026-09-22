@@ -217,3 +217,92 @@
     transform: translateY(14px);
   }
 }
+
+/* Hard mode switch, between the hero and the mode cards. */
+.hard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 1rem 1.15rem;
+  text-align: left;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  animation: rise 520ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: 40ms;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease;
+
+  &:hover {
+    border-color: var(--border-strong);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+}
+
+.hard--on {
+  border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+}
+
+.hard__track {
+  flex: none;
+  position: relative;
+  width: 2.6rem;
+  height: 1.5rem;
+  margin-top: 0.1rem;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  transition: background 180ms ease;
+}
+
+.hard--on .hard__track {
+  background: var(--danger);
+  border-color: transparent;
+}
+
+.hard__thumb {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.18rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    background 180ms ease;
+}
+
+.hard--on .hard__thumb {
+  background: #fff;
+  transform: translateX(1.05rem);
+}
+
+.hard__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.hard__title {
+  font-weight: 620;
+}
+
+.hard--on .hard__title {
+  color: var(--danger);
+}
+
+.hard__detail {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
