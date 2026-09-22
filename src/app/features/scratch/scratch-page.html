@@ -3,21 +3,27 @@
     <a class="btn btn--ghost" routerLink="/"><app-icon name="back" /> Menu</a>
     <div class="page__titles">
       <h1 class="page__title">Scratch &amp; Guess</h1>
-      <p class="page__subtitle">Every pixel you uncover costs you points</p>
+      <p class="page__subtitle">Three flags · best combined score wins</p>
     </div>
-    <button class="btn btn--ghost" type="button" (click)="playAgain()">
-      <app-icon name="refresh" /> Skip
+    <button class="btn btn--ghost" type="button" (click)="restartSession()">
+      <app-icon name="refresh" /> Restart
     </button>
   </header>
 
   <div class="layout">
     <section class="layout__board">
       <div class="score" [class.score--final]="game.isOver()">
-        <div class="score__value">
-          <span class="score__number">{{
-            game.isOver() ? game.finalScore() : game.potentialScore()
-          }}</span>
-          <span class="score__unit">/ {{ maxScore }}</span>
+        <div class="score__row">
+          <div class="score__value">
+            <span class="score__number">{{
+              game.isOver() ? game.finalScore() : game.potentialScore()
+            }}</span>
+            <span class="score__unit">/ {{ maxScore }} this round</span>
+          </div>
+          <div class="score__session">
+            <span class="score__session-total">{{ game.sessionTotal() }}</span>
+            <span class="score__unit">/ {{ maxSessionScore }} banked</span>
+          </div>
         </div>
         <div class="score__track">
           <span class="score__fill" [style.width.%]="scorePercent()"></span>
@@ -45,13 +51,35 @@
     </section>
 
     <section class="layout__side">
-      @if (game.isOver()) {
+      <ol class="rounds" aria-label="Session progress">
+        @for (slot of sessionSlots(); track $index) {
+          <li
+            class="rounds__pip"
+            [class.rounds__pip--done]="slot"
+            [class.rounds__pip--missed]="slot && !slot.won"
+            [class.rounds__pip--current]="!slot && $index + 1 === game.roundNumber()"
+          >
+            <span class="rounds__label">Round {{ $index + 1 }}</span>
+            <span class="rounds__score">{{ slot ? slot.score : '·' }}</span>
+          </li>
+        }
+      </ol>
+
+      @if (game.sessionComplete() && game.isOver()) {
+        <app-session-summary
+          [rounds]="game.sessionRounds()"
+          [total]="game.sessionTotal()"
+          [ready]="canReplay()"
+          (playAgain)="playAgain()"
+        />
+      } @else if (game.isOver()) {
         <app-result-banner
           [status]="game.status()"
           [answer]="game.answer()!"
           [headline]="resultHeadline()"
           [detail]="resultDetail()"
           [ready]="canReplay()"
+          actionLabel="Next flag"
           (playAgain)="playAgain()"
         />
       } @else {
@@ -65,13 +93,13 @@
           <p class="notice" role="alert">{{ notice() }}</p>
         } @else {
           <p class="notice notice--hint">
-            Drag across the board to rub · {{ game.attemptsLeft() }} of {{ maxAttempts }} guesses
-            left
+            Round {{ game.roundNumber() }} of {{ roundsPerSession }} · drag to rub ·
+            {{ game.attemptsLeft() }} of {{ maxAttempts }} guesses left
           </p>
         }
       }
 
-      @if (game.guesses().length > 0) {
+      @if (game.guesses().length > 0 && !game.sessionComplete()) {
         <ol class="guesses">
           @for (guess of game.guesses(); track guess.index) {
             <li class="guess" [class.guess--hit]="guess.isCorrect">
@@ -86,9 +114,9 @@
       <aside class="tips">
         <h2 class="tips__title">Scoring</h2>
         <ul class="tips__list">
-          <li>Start at {{ maxScore }} and lose points for every pixel uncovered.</li>
+          <li>Three flags per session, {{ maxScore }} points each.</li>
+          <li>Every press you rub costs about a point.</li>
           <li>A wrong guess drops the multiplier to 70%, then 45%.</li>
-          <li>Three wrong guesses end the round at zero.</li>
         </ul>
       </aside>
     </section>

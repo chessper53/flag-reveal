@@ -42,7 +42,7 @@ import { Icon } from '../icon/icon';
         [disabled]="!ready()"
         (click)="playAgain.emit()"
       >
-        Play again
+        {{ actionLabel() }}
         <kbd class="result__kbd">Enter</kbd>
       </button>
     </section>
@@ -61,6 +61,8 @@ export class ResultBanner {
    * disabled so the answer cannot be skipped past before it is visible.
    */
   readonly ready = input(true);
+  /** Button text; modes played in sessions say "Next flag" instead. */
+  readonly actionLabel = input('Play again');
 
   readonly playAgain = output<void>();
 

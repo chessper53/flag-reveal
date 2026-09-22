@@ -10,8 +10,9 @@ guess paints in the pixels where its colours match the hidden flag. Guess
 Switzerland against France and France's red band lights up.
 
 **Scratch & Guess** — the flag sits under a cover you rub away with the
-pointer. You start at 1000 points and every pixel you uncover costs you, so the
-game is how early you dare to guess.
+pointer. You start at 1000 points and every press you rub costs about one, so
+the game is how early you dare to guess. Played in sessions of three flags, for
+a combined score out of 3000.
 
 Both modes are played from the keyboard: type a country, press Enter to guess,
 press Enter again to start the next round.

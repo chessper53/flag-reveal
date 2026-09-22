@@ -5,6 +5,12 @@
  * pointer. Every uncovered cell costs points, so the game is a bet: rub until
  * you recognise it, but no further. Three guesses; a wrong one cuts the
  * multiplier rather than ending the round.
+ *
+ * Rounds are played in **sessions of three**. A single round is too swingy to
+ * compare — one lucky flag decides it — so the score players keep is the
+ * session total out of 3000. The service therefore tracks two lifetimes: the
+ * round (mask, guesses, status) and the session (which round we are on and
+ * what the finished ones scored).
  */
 
 import { Injectable, computed, inject, signal } from '@angular/core';
@@ -17,6 +23,8 @@ import {
   RoundStatus,
   SCRATCH_MAX_ATTEMPTS,
   SCRATCH_MAX_SCORE,
+  SCRATCH_ROUNDS_PER_SESSION,
+  SessionRound,
 } from '../models/game.model';
 import { GRID_HEIGHT, GRID_WIDTH } from './flag-grid.service';
 import { Mask, emptyMask, fullMask, maskRatio } from '../util/board-mask';
@@ -48,6 +56,7 @@ export class ScratchGameService {
   private readonly statusState = signal<RoundStatus>(RoundStatus.Playing);
   private readonly finalScoreState = signal<number | null>(null);
   private readonly finalScratchedState = signal(0);
+  private readonly sessionRoundsState = signal<readonly SessionRound[]>([]);
   private readonly busyState = signal(false);
 
   readonly answer = this.answerState.asReadonly();
@@ -83,13 +92,49 @@ export class ScratchGameService {
    */
   readonly finalScratchedRatio = this.finalScratchedState.asReadonly();
 
+  /** Rounds finished so far in this session, oldest first. */
+  readonly sessionRounds = this.sessionRoundsState.asReadonly();
+
+  /** 1-based number of the round being played. */
+  readonly roundNumber = computed(() =>
+    Math.min(this.sessionRoundsState().length + 1, SCRATCH_ROUNDS_PER_SESSION),
+  );
+
+  /** Points banked across the session so far. */
+  readonly sessionTotal = computed(() =>
+    this.sessionRoundsState().reduce((total, round) => total + round.score, 0),
+  );
+
+  /** True once all three rounds have been played. */
+  readonly sessionComplete = computed(
+    () => this.sessionRoundsState().length >= SCRATCH_ROUNDS_PER_SESSION,
+  );
+
   /**
-   * Starts a fresh round.
+   * Starts a new session: resets the banked rounds and deals the first flag.
    *
    * @param forced pins the answer instead of drawing one at random, which is
-   *   what the `?flag=XX` query parameter uses to share or replay a round.
+   *   what the `?flag=XX` query parameter uses. With a session that pins every
+   *   round to the same flag, which is what makes it useful for testing.
    */
-  async newRound(forced?: Country): Promise<void> {
+  async newSession(forced?: Country): Promise<void> {
+    this.sessionRoundsState.set([]);
+    await this.startRound(forced);
+  }
+
+  /**
+   * Moves on after a finished round: the next flag of this session, or a fresh
+   * session once all three have been played.
+   */
+  async advance(forced?: Country): Promise<void> {
+    if (this.sessionComplete()) {
+      await this.newSession(forced);
+      return;
+    }
+    await this.startRound(forced);
+  }
+
+  private async startRound(forced?: Country): Promise<void> {
     const seen = this.stats.statsFor(GameModeId.Scratch).seenAnswers;
     const answer = forced ?? this.countries.randomAnswer([...ANSWER_TIERS], seen);
 
@@ -206,11 +251,26 @@ export class ScratchGameService {
     if (!answer) {
       return;
     }
-    this.stats.recordRound(GameModeId.Scratch, {
+    const round: SessionRound = {
+      index: this.sessionRoundsState().length + 1,
+      country: answer,
       won: status === RoundStatus.Won,
+      score,
+      scratchedRatio: this.finalScratchedState(),
+    };
+    this.sessionRoundsState.update((rounds) => [...rounds, round]);
+
+    this.stats.recordRound(GameModeId.Scratch, {
+      won: round.won,
       attemptsUsed: this.guessesState().length,
       answer: answer.code,
       score,
     });
+
+    // The session total is the number players actually compare, so that — not
+    // a single round — is what gets recorded as a personal best.
+    if (this.sessionComplete()) {
+      this.stats.recordSession(GameModeId.Scratch, this.sessionTotal());
+    }
   }
 }

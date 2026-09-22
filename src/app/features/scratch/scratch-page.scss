@@ -1,5 +1,3 @@
-@use '../../../styles/game-page';
-
 :host {
   --accent: #f5b544;
   display: block;
@@ -19,10 +17,26 @@
   border-color: color-mix(in srgb, var(--accent) 50%, transparent);
 }
 
-.score__value {
+.score__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.score__value,
+.score__session {
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
+}
+
+.score__session-total {
+  font-size: 1.25rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
 }
 
 .score__number {
@@ -78,4 +92,54 @@
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--text-secondary);
+}
+
+/* Session progress: one pip per round, filled in as they are played. */
+.rounds {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rounds__pip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.7rem;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition:
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.rounds__pip--current {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.rounds__pip--done .rounds__score {
+  color: var(--accent);
+}
+
+.rounds__pip--missed .rounds__score {
+  color: var(--text-faint);
+}
+
+.rounds__label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.rounds__score {
+  font-size: 1.05rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
 }

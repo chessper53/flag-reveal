@@ -100,3 +100,22 @@ export const SCRATCH_MAX_SCORE = 1000;
 
 /** Guesses allowed in a Scratch round before it is lost. */
 export const SCRATCH_MAX_ATTEMPTS = 3;
+
+/**
+ * Flags per Scratch session. A session is the unit players compare: three
+ * rounds, then one combined score out of {@link SCRATCH_MAX_SESSION_SCORE}.
+ */
+export const SCRATCH_ROUNDS_PER_SESSION = 3;
+
+export const SCRATCH_MAX_SESSION_SCORE = SCRATCH_MAX_SCORE * SCRATCH_ROUNDS_PER_SESSION;
+
+/** What one finished round contributed to the session. */
+export interface SessionRound {
+  /** 1-based position in the session. */
+  readonly index: number;
+  readonly country: Country;
+  readonly won: boolean;
+  readonly score: number;
+  /** How much had been rubbed away when the round ended, 0..1. */
+  readonly scratchedRatio: number;
+}

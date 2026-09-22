@@ -25,6 +25,8 @@ import {
   RoundStatus,
   SCRATCH_MAX_ATTEMPTS,
   SCRATCH_MAX_SCORE,
+  SCRATCH_MAX_SESSION_SCORE,
+  SCRATCH_ROUNDS_PER_SESSION,
 } from '../../core/models/game.model';
 import { GRID_WIDTH } from '../../core/services/flag-grid.service';
 import { ScratchGameService } from '../../core/services/scratch-game.service';
@@ -32,6 +34,7 @@ import { BoardPoint, FlagBoard } from '../../shared/flag-board/flag-board';
 import { CountryPicker } from '../../shared/country-picker/country-picker';
 import { Icon } from '../../shared/icon/icon';
 import { ResultBanner } from '../../shared/result-banner/result-banner';
+import { SessionSummary } from './session-summary';
 
 /**
  * Brush radius in cells, expressed against the grid width so it survives a
@@ -46,7 +49,7 @@ const BRUSH_FRACTION = BRUSH_RADIUS_CELLS / 128;
 @Component({
   selector: 'app-scratch-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FlagBoard, CountryPicker, ResultBanner, Icon],
+  imports: [RouterLink, FlagBoard, CountryPicker, ResultBanner, SessionSummary, Icon],
   templateUrl: './scratch-page.html',
   styleUrl: './scratch-page.scss',
 })
@@ -55,6 +58,14 @@ export class ScratchPage implements OnInit {
   protected readonly RoundStatus = RoundStatus;
   protected readonly maxAttempts = SCRATCH_MAX_ATTEMPTS;
   protected readonly maxScore = SCRATCH_MAX_SCORE;
+  protected readonly maxSessionScore = SCRATCH_MAX_SESSION_SCORE;
+  protected readonly roundsPerSession = SCRATCH_ROUNDS_PER_SESSION;
+
+  /** One slot per session round, so the header can show progress at a glance. */
+  protected readonly sessionSlots = computed(() => {
+    const played = this.game.sessionRounds();
+    return Array.from({ length: SCRATCH_ROUNDS_PER_SESSION }, (_, index) => played[index] ?? null);
+  });
 
   private readonly route = inject(ActivatedRoute);
   private readonly countries = inject(CountryService);
@@ -101,13 +112,15 @@ export class ScratchPage implements OnInit {
 
   protected readonly resultDetail = computed(() => {
     const scratched = this.finalScratchedPercent();
-    return this.game.status() === RoundStatus.Won
-      ? `Recognised it with ${scratched}% rubbed away.`
-      : `The cover is off — you had rubbed ${scratched}% of it.`;
+    const opener =
+      this.game.status() === RoundStatus.Won
+        ? `Recognised it with ${scratched}% rubbed away.`
+        : `The cover is off — you had rubbed ${scratched}%.`;
+    return `${opener} ${this.game.sessionTotal()} points banked.`;
   });
 
   ngOnInit(): void {
-    this.playAgain();
+    void this.game.newSession(this.forcedAnswer());
   }
 
   /**
@@ -139,13 +152,22 @@ export class ScratchPage implements OnInit {
     this.notice.set(`No country called “${text}”.`);
   }
 
+  /** Next flag of the session, or a fresh session once all three are played. */
   protected playAgain(): void {
     if (this.game.isOver() && !this.canReplay()) {
       return;
     }
     this.notice.set('');
     void this.game
-      .newRound(this.forcedAnswer())
+      .advance(this.forcedAnswer())
+      .then(() => this.focusTick.update((tick) => tick + 1));
+  }
+
+  /** Abandons the current session and deals a fresh set of three flags. */
+  protected restartSession(): void {
+    this.notice.set('');
+    void this.game
+      .newSession(this.forcedAnswer())
       .then(() => this.focusTick.update((tick) => tick + 1));
   }
 }

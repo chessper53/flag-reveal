@@ -80,7 +80,7 @@ src/app/
 ├── features/                    # One folder per page, lazily routed.
 │   ├── menu/                    # Mode cards + lifetime stats
 │   ├── reveal/                  # Colour Reveal page
-│   └── scratch/                 # Scratch & Guess page
+│   └── scratch/                 # Scratch & Guess page + session summary
 └── shared/                      # Reusable presentational components.
     ├── flag-board/              # The canvas playfield
     ├── country-picker/          # Autocomplete with flag previews
@@ -119,10 +119,22 @@ Results are cached per country code and concurrent loads are de-duplicated.
 
 They differ only in what makes a cell visible:
 
-| Mode    | Reveal rule                                       | Scoring                                                              |
-| ------- | ------------------------------------------------- | -------------------------------------------------------------------- |
-| Reveal  | `guess.families[i] === answer.families[i]`         | 5 attempts, win or lose                                              |
-| Scratch | the pointer passed within the brush radius        | `1000 × (1 − rubbed) × multiplier`, multiplier `1 / 0.7 / 0.45` |
+| Mode    | Reveal rule                                | Scoring                                                         |
+| ------- | ------------------------------------------ | --------------------------------------------------------------- |
+| Reveal  | `guess.families[i] === answer.families[i]` | 5 attempts, win or lose                                         |
+| Scratch | the pointer passed within the brush radius | `1000 × (1 − rubbed) × multiplier`, multiplier `1 / 0.7 / 0.45` |
+
+`ScratchGameService` additionally tracks a **session**: three rounds, then one
+combined score out of 3000. It therefore has two lifetimes — the round (mask,
+guesses, status) and the session (`sessionRounds`, `sessionTotal`,
+`sessionComplete`) — and three entry points:
+
+- `newSession(forced?)` — clear the banked rounds, deal the first flag.
+- `advance(forced?)` — next flag, or a new session if all three are played.
+- `startRound(forced?)` — private; the per-round reset both of the above share.
+
+A session is the number players compare, so the session total (not a single
+round) is what `StatsService.recordSession()` keeps as a personal best.
 
 ### `FlagBoard` — the playfield
 
@@ -186,7 +198,8 @@ over the same window.
 | hue/value cut-offs in `classifyRgb`  | `color.model.ts`        | Which colours count as "the same"  |
 | `REVEAL_MAX_ATTEMPTS`                | `game.model.ts`         | Guesses in Reveal                  |
 | `SCRATCH_MAX_SCORE`, multipliers     | `game.model.ts`, engine | Scratch scoring curve              |
-| `BRUSH_FRACTION`                     | `scratch-page.ts`       | Rub size, as a share of board width|
+| `SCRATCH_ROUNDS_PER_SESSION`         | `game.model.ts`         | Flags per Scratch session          |
+| `BRUSH_RADIUS_CELLS`                 | `scratch-page.ts`       | Rub size; 2 cells ≈ 1 point a tap  |
 | `REVEAL_GRACE_MS`                    | `replay-arming.ts`      | How long the answer holds the screen|
 | `EASY` / `MEDIUM` tier lists         | `build-flag-data.mjs`   | Which flags can be answers         |
 

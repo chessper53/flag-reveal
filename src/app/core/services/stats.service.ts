@@ -31,6 +31,9 @@ export class StatsService {
   /**
    * Records a finished round.
    *
+   * Note this does *not* touch `bestScore`: for modes played in sessions, a
+   * personal best is a session total, recorded by {@link recordSession}.
+   *
    * @param attemptsUsed 1-based number of guesses spent, for the distribution.
    * @param score points earned, for modes that score.
    */
@@ -55,12 +58,25 @@ export class StatsService {
           ? Math.max(previous.bestStreak, previous.currentStreak + 1)
           : previous.bestStreak,
         winsByAttempt,
-        bestScore: Math.max(previous.bestScore, score),
+        bestScore: previous.bestScore,
         totalScore: previous.totalScore + score,
         seenAnswers: [outcome.answer, ...previous.seenAnswers].slice(0, SEEN_HISTORY),
       };
 
       const updated = { ...current, [mode]: next };
+      writeStored(updated);
+      return updated;
+    });
+  }
+
+  /** Records the combined score of a finished session as a personal best. */
+  recordSession(mode: GameModeId, total: number): void {
+    this.state.update((current) => {
+      const previous = current[mode] ?? EMPTY_STATS;
+      const updated = {
+        ...current,
+        [mode]: { ...previous, bestScore: Math.max(previous.bestScore, total) },
+      };
       writeStored(updated);
       return updated;
     });

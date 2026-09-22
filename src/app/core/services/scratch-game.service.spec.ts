@@ -2,9 +2,15 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ColorFamily } from '../models/color.model';
 import { Continent, Country, FlagGrid, Tier } from '../models/flag.model';
-import { RoundStatus, SCRATCH_MAX_SCORE } from '../models/game.model';
+import {
+  GameModeId,
+  RoundStatus,
+  SCRATCH_MAX_SCORE,
+  SCRATCH_ROUNDS_PER_SESSION,
+} from '../models/game.model';
 import { GRID_CELLS, GRID_HEIGHT, GRID_WIDTH, FlagGridService } from './flag-grid.service';
 import { ScratchGameService } from './scratch-game.service';
+import { StatsService } from './stats.service';
 
 const BRAZIL: Country = {
   code: 'BR',
@@ -40,7 +46,7 @@ describe('ScratchGameService', () => {
       providers: [{ provide: FlagGridService, useClass: StubGridService }],
     });
     game = TestBed.inject(ScratchGameService);
-    await game.newRound(BRAZIL);
+    await game.newSession(BRAZIL);
   });
 
   it('starts covered and worth full marks', () => {
@@ -118,7 +124,7 @@ describe('ScratchGameService reporting', () => {
       providers: [{ provide: FlagGridService, useClass: StubGridService }],
     });
     game = TestBed.inject(ScratchGameService);
-    await game.newRound(BRAZIL);
+    await game.newSession(BRAZIL);
   });
 
   it('freezes the rubbed share at the moment the round ended', () => {
@@ -131,5 +137,100 @@ describe('ScratchGameService reporting', () => {
     // how much the player actually rubbed.
     expect(game.scratchedRatio()).toBe(1);
     expect(game.finalScratchedRatio()).toBeCloseTo(rubbed, 5);
+  });
+});
+
+describe('ScratchGameService sessions', () => {
+  let game: ScratchGameService;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    TestBed.configureTestingModule({
+      providers: [{ provide: FlagGridService, useClass: StubGridService }],
+    });
+    game = TestBed.inject(ScratchGameService);
+    await game.newSession(BRAZIL);
+  });
+
+  it('opens on round one of three with nothing banked', () => {
+    expect(game.roundNumber()).toBe(1);
+    expect(game.sessionTotal()).toBe(0);
+    expect(game.sessionComplete()).toBe(false);
+  });
+
+  it('banks each round and advances to the next flag', async () => {
+    game.submit(BRAZIL);
+    const first = game.finalScore()!;
+
+    await game.advance(BRAZIL);
+
+    expect(game.roundNumber()).toBe(2);
+    expect(game.sessionTotal()).toBe(first);
+    expect(game.sessionComplete()).toBe(false);
+    // The new round starts clean.
+    expect(game.status()).toBe(RoundStatus.Playing);
+    expect(game.scratchedRatio()).toBe(0);
+  });
+
+  it('completes after three rounds and totals them', async () => {
+    const scores: number[] = [];
+    for (let round = 0; round < SCRATCH_ROUNDS_PER_SESSION; round++) {
+      game.rub(20 + round, 20, 4);
+      game.submit(BRAZIL);
+      scores.push(game.finalScore()!);
+      if (round < SCRATCH_ROUNDS_PER_SESSION - 1) {
+        await game.advance(BRAZIL);
+      }
+    }
+
+    expect(game.sessionComplete()).toBe(true);
+    expect(game.sessionRounds()).toHaveLength(SCRATCH_ROUNDS_PER_SESSION);
+    expect(game.sessionTotal()).toBe(scores.reduce((sum, score) => sum + score, 0));
+  });
+
+  it('records a lost round as a zero that still fills a slot', async () => {
+    for (const code of ['AR', 'CO', 'PE']) {
+      game.submit({ ...BRAZIL, code, name: code });
+    }
+
+    expect(game.sessionRounds()).toHaveLength(1);
+    expect(game.sessionRounds()[0].won).toBe(false);
+    expect(game.sessionRounds()[0].score).toBe(0);
+    expect(game.sessionTotal()).toBe(0);
+
+    await game.advance(BRAZIL);
+    expect(game.roundNumber()).toBe(2);
+  });
+
+  it('starts a fresh session once the third round is done', async () => {
+    for (let round = 0; round < SCRATCH_ROUNDS_PER_SESSION; round++) {
+      game.submit(BRAZIL);
+      if (round < SCRATCH_ROUNDS_PER_SESSION - 1) {
+        await game.advance(BRAZIL);
+      }
+    }
+    expect(game.sessionComplete()).toBe(true);
+
+    // Advancing past a complete session deals a new one rather than a 4th flag.
+    await game.advance(BRAZIL);
+
+    expect(game.sessionComplete()).toBe(false);
+    expect(game.roundNumber()).toBe(1);
+    expect(game.sessionTotal()).toBe(0);
+    expect(game.sessionRounds()).toHaveLength(0);
+  });
+
+  it('keeps the session total as the personal best, not a single round', async () => {
+    for (let round = 0; round < SCRATCH_ROUNDS_PER_SESSION; round++) {
+      game.submit(BRAZIL);
+      if (round < SCRATCH_ROUNDS_PER_SESSION - 1) {
+        await game.advance(BRAZIL);
+      }
+    }
+    const total = game.sessionTotal();
+    const stats = TestBed.inject(StatsService).statsFor(GameModeId.Scratch);
+
+    expect(stats.bestScore).toBe(total);
+    expect(total).toBeGreaterThan(SCRATCH_MAX_SCORE);
   });
 });
