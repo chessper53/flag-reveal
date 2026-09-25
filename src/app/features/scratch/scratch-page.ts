@@ -16,11 +16,19 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Country, flagAssetUrl } from '../../core/models/flag.model';
 import { CountryService } from '../../core/services/country.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { createReplayArming } from '../../core/util/replay-arming';
+import { normalizeSeed } from '../../core/util/rng';
+import {
+  HARD_PARAM,
+  ROUND_PARAM,
+  SEED_PARAM,
+  buildShareLink,
+  copyText,
+} from '../../core/util/share-link';
 import {
   GuessRejection,
   RoundStatus,
@@ -69,6 +77,7 @@ export class ScratchPage implements OnInit {
   });
 
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly countries = inject(CountryService);
   protected readonly settings = inject(SettingsService);
 
@@ -89,6 +98,8 @@ export class ScratchPage implements OnInit {
   protected readonly canReplay = createReplayArming(this.game.isOver);
 
   protected readonly notice = signal('');
+  /** Share button text, flipped to a confirmation after a copy. */
+  protected readonly shareLabel = signal(SHARE_IDLE_LABEL);
   protected readonly focusTick = signal(0);
 
   protected readonly scratchedPercent = computed(() =>
@@ -122,7 +133,59 @@ export class ScratchPage implements OnInit {
   });
 
   ngOnInit(): void {
-    void this.game.newSession(this.forcedAnswer());
+    this.applyChallengeFromUrl();
+    void this.game.newSession(this.forcedAnswer()).then(() => this.syncUrlToChallenge());
+  }
+
+  /**
+   * Reads a shared challenge out of the URL.
+   *
+   * Hard mode is applied first: it decides the answer pool, so the seed alone
+   * would deal different flags to a player whose toggle happened to differ.
+   */
+  private applyChallengeFromUrl(): void {
+    const params = this.route.snapshot.queryParamMap;
+    const hard = params.get(HARD_PARAM);
+    if (hard !== null) {
+      this.settings.setHardMode(hard === '1' || hard === 'true');
+    }
+    const seed = params.get(SEED_PARAM);
+    if (seed) {
+      const index = Number.parseInt(params.get(ROUND_PARAM) ?? '0', 10);
+      this.game.useChallenge(normalizeSeed(seed), Number.isFinite(index) ? index : 0);
+    }
+  }
+
+  /**
+   * Writes the current challenge into the address bar.
+   *
+   * This makes the URL itself the share link, so a player can always copy it
+   * by hand — the Share button is then a convenience rather than the only
+   * route out. It also means a reload replays the same round instead of
+   * silently dealing a different one.
+   */
+  private syncUrlToChallenge(): void {
+    const { seed, index } = this.game.challenge;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        [SEED_PARAM]: seed,
+        [ROUND_PARAM]: index > 0 ? index : null,
+        [HARD_PARAM]: this.settings.hardMode() ? 1 : null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  /** Copies a link that reproduces exactly what was just played. */
+  protected async onShare(): Promise<void> {
+    const { seed, index } = this.game.challenge;
+    const link = buildShareLink('play/scratch', seed, index, this.settings.hardMode());
+    const copied = await copyText(link);
+    // A blocked clipboard is not a dead end: the address bar holds the link.
+    this.shareLabel.set(copied ? 'Link copied!' : 'Copy from the address bar');
+    setTimeout(() => this.shareLabel.set(SHARE_IDLE_LABEL), 2500);
   }
 
   /**
@@ -160,19 +223,23 @@ export class ScratchPage implements OnInit {
       return;
     }
     this.notice.set('');
-    void this.game
-      .advance(this.forcedAnswer())
-      .then(() => this.focusTick.update((tick) => tick + 1));
+    void this.game.advance(this.forcedAnswer()).then(() => {
+      this.syncUrlToChallenge();
+      this.focusTick.update((tick) => tick + 1);
+    });
   }
 
   /** Abandons the current session and deals a fresh set of three flags. */
   protected restartSession(): void {
     this.notice.set('');
-    void this.game
-      .newSession(this.forcedAnswer())
-      .then(() => this.focusTick.update((tick) => tick + 1));
+    void this.game.newSession(this.forcedAnswer()).then(() => {
+      this.syncUrlToChallenge();
+      this.focusTick.update((tick) => tick + 1);
+    });
   }
 }
+
+const SHARE_IDLE_LABEL = 'Share these 3 flags';
 
 const REJECTION_MESSAGES: Record<GuessRejection, string> = {
   [GuessRejection.RoundOver]: 'This round is over — press Enter for a new flag.',

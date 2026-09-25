@@ -9,6 +9,7 @@
 import { Injectable } from '@angular/core';
 import { COUNTRIES } from '../data/countries.generated';
 import { Country, CountryCode, Tier } from '../models/flag.model';
+import { rngFor } from '../util/rng';
 
 /** A country plus where the query matched, so the UI can highlight it. */
 export interface CountryMatch {
@@ -134,10 +135,37 @@ export class CountryService {
    * Falls back to the full tier pool once every country has been seen.
    */
   randomAnswer(tiers: readonly Tier[], exclude: readonly CountryCode[] = []): Country {
-    const pool = this.all.filter((country) => tiers.includes(country.tier));
+    const pool = this.poolFor(tiers);
     const excluded = new Set(exclude);
     const fresh = pool.filter((country) => !excluded.has(country.code));
     const source = fresh.length > 0 ? fresh : pool;
     return source[Math.floor(Math.random() * source.length)];
+  }
+
+  /**
+   * The answer for round `index` of `seed` — the same country for everyone who
+   * opens the same link.
+   *
+   * `exclude` keeps a session from repeating itself, and is only safe to pass
+   * values that both players will compute identically (the codes already dealt
+   * from this same seed). Passing anything player-specific, such as history
+   * from localStorage, would silently desynchronise the two sides.
+   */
+  seededAnswer(
+    tiers: readonly Tier[],
+    seed: string,
+    index: number,
+    exclude: readonly CountryCode[] = [],
+  ): Country {
+    const pool = this.poolFor(tiers);
+    const excluded = new Set(exclude);
+    const fresh = pool.filter((country) => !excluded.has(country.code));
+    const source = fresh.length > 0 ? fresh : pool;
+    return source[Math.floor(rngFor(seed, index)() * source.length)];
+  }
+
+  /** Countries in the given tiers, in catalogue order. */
+  private poolFor(tiers: readonly Tier[]): readonly Country[] {
+    return this.all.filter((country) => tiers.includes(country.tier));
   }
 }

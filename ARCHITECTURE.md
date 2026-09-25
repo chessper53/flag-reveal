@@ -77,7 +77,12 @@ src/app/
 │   │   ├── scratch-game.service.ts  # Scratch mode rules + state
 │   │   ├── mosaic-game.service.ts   # Mosaic mode rules + state
 │   │   └── stats.service.ts     # localStorage-backed stats
-│   └── util/board-mask.ts       # The visibility mask shared by both modes
+│   └── util/
+│       ├── board-mask.ts        # The visibility mask shared by the modes
+│       ├── round-dealer.ts      # Seeded, shareable answer dealing
+│       ├── rng.ts               # Deterministic RNG + seed handling
+│       ├── share-link.ts        # Share URL building and clipboard
+│       └── replay-arming.ts     # Holds a finished round on screen
 ├── features/                    # One folder per page, lazily routed.
 │   ├── menu/                    # Mode cards + lifetime stats
 │   ├── reveal/                  # Colour Reveal page
@@ -174,6 +179,33 @@ Search (`CountryService.search`) folds accents, matches aliases and ISO codes,
 and ranks prefix hits above substring hits. Enter takes the highlighted
 suggestion, or resolves the typed text when it is unambiguous — which is what
 lets a round be played entirely by typing.
+
+### Seeded challenges
+
+Nothing is dealt with `Math.random()`. Every mode owns a `RoundDealer`
+(`core/util/round-dealer.ts`) holding a seed, the index of the next flag, and
+the index the current round or session began at. `CountryService.seededAnswer`
+turns `(tiers, seed, index)` into a country, so the same link always produces
+the same flags.
+
+Three details carry the weight:
+
+- **The hard-mode flag travels in the link.** Hard mode widens the answer pool,
+  so the seed alone is not enough — two players whose toggles differed would
+  deal different flags and never know. The page applies `hard` *before* the
+  first round is dealt.
+- **Exclusions must be symmetric.** The dealer only skips codes dealt within
+  the current session, never the player's own history from localStorage. A
+  player-specific exclusion list would desynchronise the two sides silently.
+- **Indexes are addressable, not sequential.** `rngFor(seed, index)` hashes the
+  index into the state rather than advancing a stream, so round 7 can be dealt
+  without dealing 1–6 first. That is what lets a share link jump straight to
+  the round being shared.
+
+The shareable unit differs per mode: one round for Reveal and Mosaic, the
+three-flag session for Scratch. Each page writes its challenge into the address
+bar on every deal (`replaceUrl`), so the URL *is* the share link — the Share
+button is a convenience, and a blocked clipboard is not a dead end.
 
 ### Hard mode
 

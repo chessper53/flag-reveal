@@ -78,8 +78,19 @@
   color: var(--text-muted);
 }
 
+.result__actions {
+  flex: none;
+  display: flex;
+  gap: 0.5rem;
+}
+
 .result__again {
   flex: none;
+}
+
+.result__share {
+  flex: none;
+  padding-inline: 0.85rem;
 }
 
 .result__kbd {
@@ -96,8 +107,12 @@
     flex-wrap: wrap;
   }
 
-  .result__again {
+  .result__actions {
     width: 100%;
+  }
+
+  .result__again {
+    flex: 1;
   }
 }
 

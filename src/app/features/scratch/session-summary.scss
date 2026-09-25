@@ -118,6 +118,19 @@
   border-radius: 0.35rem;
 }
 
+.summary__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.summary__again {
+  flex: 1;
+}
+
+.summary__share {
+  flex: none;
+}
+
 @keyframes summary-in {
   from {
     opacity: 0;

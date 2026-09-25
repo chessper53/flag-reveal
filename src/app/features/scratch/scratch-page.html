@@ -73,7 +73,9 @@
           [rounds]="game.sessionRounds()"
           [total]="game.sessionTotal()"
           [ready]="canReplay()"
+          [shareLabel]="shareLabel()"
           (playAgain)="playAgain()"
+          (share)="onShare()"
         />
       } @else if (game.isOver()) {
         <app-result-banner
@@ -83,7 +85,9 @@
           [detail]="resultDetail()"
           [ready]="canReplay()"
           actionLabel="Next flag"
+          [shareLabel]="shareLabel()"
           (playAgain)="playAgain()"
+          (share)="onShare()"
         />
       } @else {
         <app-country-picker

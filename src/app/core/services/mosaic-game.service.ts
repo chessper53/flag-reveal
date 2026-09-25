@@ -26,6 +26,7 @@ import {
   MOSAIC_STEPS,
   RoundStatus,
 } from '../models/game.model';
+import { RoundDealer } from '../util/round-dealer';
 import { CountryService } from './country.service';
 import { StatsService } from './stats.service';
 
@@ -36,6 +37,8 @@ const ANSWER_TIERS = [Tier.Easy, Tier.Medium, Tier.Hard] as const;
 export class MosaicGameService {
   private readonly countries = inject(CountryService);
   private readonly stats = inject(StatsService);
+  /** Deals answers deterministically so a round can be shared by link. */
+  private readonly dealer = new RoundDealer();
 
   private readonly answerState = signal<Country | null>(null);
   private readonly guessesState = signal<readonly Guess[]>([]);
@@ -66,8 +69,8 @@ export class MosaicGameService {
    *   what the `?flag=XX` query parameter uses to share or replay a round.
    */
   async newRound(forced?: Country): Promise<void> {
-    const seen = this.stats.statsFor(GameModeId.Mosaic).seenAnswers;
-    const answer = forced ?? this.countries.randomAnswer([...ANSWER_TIERS], seen);
+    this.dealer.beginSession();
+    const answer = forced ?? this.dealer.deal(this.countries, ANSWER_TIERS);
 
     this.answerState.set(answer);
     this.guessesState.set([]);
@@ -105,6 +108,16 @@ export class MosaicGameService {
     }
 
     return { accepted: true, guess };
+  }
+
+  /** The seed and position a share link should carry. */
+  get challenge(): { seed: string; index: number } {
+    return { seed: this.dealer.seed, index: this.dealer.shareIndex };
+  }
+
+  /** Points the mode at a shared challenge before the first round is dealt. */
+  useChallenge(seed: string, index: number): void {
+    this.dealer.configure(seed, index);
   }
 
   giveUp(): void {

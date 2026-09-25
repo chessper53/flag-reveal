@@ -36,7 +36,9 @@
           [headline]="resultHeadline()"
           [detail]="resultDetail()"
           [ready]="canReplay()"
+          [shareLabel]="shareLabel()"
           (playAgain)="playAgain()"
+          (share)="onShare()"
         />
       } @else {
         <app-country-picker

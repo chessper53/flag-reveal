@@ -28,6 +28,7 @@ import {
 } from '../models/game.model';
 import { GRID_HEIGHT, GRID_WIDTH } from './flag-grid.service';
 import { Mask, emptyMask, fullMask, maskRatio } from '../util/board-mask';
+import { RoundDealer } from '../util/round-dealer';
 import { CountryService } from './country.service';
 import { FlagGridService } from './flag-grid.service';
 import { SettingsService } from './settings.service';
@@ -54,6 +55,8 @@ export class ScratchGameService {
   private readonly countries = inject(CountryService);
   private readonly grids = inject(FlagGridService);
   private readonly stats = inject(StatsService);
+  /** Deals answers deterministically so a session can be shared by link. */
+  private readonly dealer = new RoundDealer();
   private readonly settings = inject(SettingsService);
 
   private readonly answerState = signal<Country | null>(null);
@@ -126,7 +129,19 @@ export class ScratchGameService {
    */
   async newSession(forced?: Country): Promise<void> {
     this.sessionRoundsState.set([]);
+    // A session is one shareable unit: three flags from consecutive indices.
+    this.dealer.beginSession();
     await this.startRound(forced);
+  }
+
+  /** The seed and position a share link should carry. */
+  get challenge(): { seed: string; index: number } {
+    return { seed: this.dealer.seed, index: this.dealer.shareIndex };
+  }
+
+  /** Points the mode at a shared challenge before the first session is dealt. */
+  useChallenge(seed: string, index: number): void {
+    this.dealer.configure(seed, index);
   }
 
   /**
@@ -142,9 +157,8 @@ export class ScratchGameService {
   }
 
   private async startRound(forced?: Country): Promise<void> {
-    const seen = this.stats.statsFor(GameModeId.Scratch).seenAnswers;
     const tiers = this.settings.hardMode() ? HARD_TIERS : NORMAL_TIERS;
-    const answer = forced ?? this.countries.randomAnswer([...tiers], seen);
+    const answer = forced ?? this.dealer.deal(this.countries, tiers);
 
     this.answerState.set(answer);
     this.answerGridState.set(null);

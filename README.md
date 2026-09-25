@@ -22,6 +22,11 @@ to be readable. Every one of the 197 countries can come up.
 autocomplete, so you have to know a country by name rather than matching
 thumbnails against the board, and opens the answer pool to every country.
 
+**Share a challenge.** Every round is dealt from a seed that lives in the URL,
+so sending someone the link gives them the same flags in the same order — one
+round in Reveal and Mosaic, the whole three-flag session in Scratch. The Share
+button on the result panel copies it; the address bar always holds it too.
+
 All modes are played from the keyboard: type a country, press Enter to guess,
 press Enter again to start the next round.
 

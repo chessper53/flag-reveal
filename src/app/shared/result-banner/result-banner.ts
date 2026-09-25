@@ -36,15 +36,20 @@ import { Icon } from '../icon/icon';
         <p class="result__detail">{{ detail() }}</p>
       </div>
 
-      <button
-        class="btn btn--primary result__again"
-        type="button"
-        [disabled]="!ready()"
-        (click)="playAgain.emit()"
-      >
-        {{ actionLabel() }}
-        <kbd class="result__kbd">Enter</kbd>
-      </button>
+      <div class="result__actions">
+        <button class="btn result__share" type="button" (click)="share.emit()">
+          {{ shareLabel() }}
+        </button>
+        <button
+          class="btn btn--primary result__again"
+          type="button"
+          [disabled]="!ready()"
+          (click)="playAgain.emit()"
+        >
+          {{ actionLabel() }}
+          <kbd class="result__kbd">Enter</kbd>
+        </button>
+      </div>
     </section>
   `,
   styleUrl: './result-banner.scss',
@@ -63,8 +68,12 @@ export class ResultBanner {
   readonly ready = input(true);
   /** Button text; modes played in sessions say "Next flag" instead. */
   readonly actionLabel = input('Play again');
+  /** Share button text, so the page can flip it to a confirmation. */
+  readonly shareLabel = input('Share');
 
   readonly playAgain = output<void>();
+  /** Asks the page to build and copy a link to this exact challenge. */
+  readonly share = output<void>();
 
   protected readonly RoundStatus = RoundStatus;
 

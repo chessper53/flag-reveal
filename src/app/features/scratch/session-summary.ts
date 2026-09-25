@@ -38,15 +38,20 @@ import { Icon } from '../../shared/icon/icon';
         }
       </ol>
 
-      <button
-        class="btn btn--primary summary__again"
-        type="button"
-        [disabled]="!ready()"
-        (click)="playAgain.emit()"
-      >
-        New session
-        <kbd class="summary__kbd">Enter</kbd>
-      </button>
+      <div class="summary__actions">
+        <button class="btn summary__share" type="button" (click)="share.emit()">
+          {{ shareLabel() }}
+        </button>
+        <button
+          class="btn btn--primary summary__again"
+          type="button"
+          [disabled]="!ready()"
+          (click)="playAgain.emit()"
+        >
+          New session
+          <kbd class="summary__kbd">Enter</kbd>
+        </button>
+      </div>
     </section>
   `,
   styleUrl: './session-summary.scss',
@@ -57,7 +62,12 @@ export class SessionSummary {
   /** False while the last flag is still being revealed. */
   readonly ready = input(true);
 
+  /** Share button text, so the page can flip it to a confirmation. */
+  readonly shareLabel = input('Share these 3 flags');
+
   readonly playAgain = output<void>();
+  /** Asks the page to build and copy a link to this exact session. */
+  readonly share = output<void>();
 
   protected readonly maxScore = SCRATCH_MAX_SESSION_SCORE;
 

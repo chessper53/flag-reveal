@@ -21,6 +21,7 @@ import {
   RoundStatus,
 } from '../models/game.model';
 import { Mask, emptyMask, fullMask, maskRatio } from '../util/board-mask';
+import { RoundDealer } from '../util/round-dealer';
 import { CountryService } from './country.service';
 import { FlagGridService } from './flag-grid.service';
 import { SettingsService } from './settings.service';
@@ -38,6 +39,8 @@ export class RevealGameService {
   private readonly countries = inject(CountryService);
   private readonly grids = inject(FlagGridService);
   private readonly stats = inject(StatsService);
+  /** Deals answers deterministically so a round can be shared by link. */
+  private readonly dealer = new RoundDealer();
   private readonly settings = inject(SettingsService);
 
   private readonly answerState = signal<Country | null>(null);
@@ -69,9 +72,9 @@ export class RevealGameService {
    *   what the `?flag=XX` query parameter uses to share or replay a round.
    */
   async newRound(forced?: Country): Promise<void> {
-    const seen = this.stats.statsFor(GameModeId.Reveal).seenAnswers;
     const tiers = this.settings.hardMode() ? HARD_TIERS : NORMAL_TIERS;
-    const answer = forced ?? this.countries.randomAnswer([...tiers], seen);
+    this.dealer.beginSession();
+    const answer = forced ?? this.dealer.deal(this.countries, tiers);
 
     this.answerState.set(answer);
     this.answerGridState.set(null);
@@ -143,6 +146,16 @@ export class RevealGameService {
     }
 
     return { accepted: true, guess };
+  }
+
+  /** The seed and position a share link should carry. */
+  get challenge(): { seed: string; index: number } {
+    return { seed: this.dealer.seed, index: this.dealer.shareIndex };
+  }
+
+  /** Points the mode at a shared challenge before the first round is dealt. */
+  useChallenge(seed: string, index: number): void {
+    this.dealer.configure(seed, index);
   }
 
   /** Ends the round early and shows the answer. */
