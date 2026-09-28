@@ -36,6 +36,13 @@ const HARD_TIERS = [Tier.Easy, Tier.Medium, Tier.Hard] as const;
 
 @Injectable({ providedIn: 'root' })
 export class RevealGameService {
+  /**
+   * Which mode's stats this instance records. Inverted Reveal shares these
+   * rules exactly and only differs in how the board paints, so it subclasses
+   * rather than copying the engine — but it keeps its own stats and streak.
+   */
+  protected readonly modeId: GameModeId = GameModeId.Reveal;
+
   private readonly countries = inject(CountryService);
   private readonly grids = inject(FlagGridService);
   private readonly stats = inject(StatsService);
@@ -173,7 +180,7 @@ export class RevealGameService {
     if (!answer) {
       return;
     }
-    this.stats.recordRound(GameModeId.Reveal, {
+    this.stats.recordRound(this.modeId, {
       won: status === RoundStatus.Won,
       attemptsUsed,
       answer: answer.code,

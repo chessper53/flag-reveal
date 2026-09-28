@@ -78,6 +78,11 @@ export class FlagBoard {
    * is ignored. This is Mosaic mode: the flag is not hidden, just unreadable.
    */
   readonly mosaicColumns = input<number | null>(null);
+  /**
+   * Paints the flag's negative. Only the artwork is inverted, never the cover
+   * or the board chrome, so the hidden parts still read as hidden.
+   */
+  readonly invert = input(false);
   /** When true, pointer drags emit {@link scratch} events. */
   readonly interactive = input(false);
   /** Accessible description of the board's current state. */
@@ -148,6 +153,7 @@ export class FlagBoard {
       this.coverStyle();
       this.flagUrl();
       this.mosaicColumns();
+      this.invert();
       this.viewReady = true;
       this.resizeCanvas();
       this.startAnimation();
@@ -363,7 +369,11 @@ export class FlagBoard {
     flagContext.clearRect(0, 0, width, height);
     flagContext.imageSmoothingEnabled = true;
     flagContext.imageSmoothingQuality = 'high';
+    // Invert while drawing the artwork, before the mask is applied, so only
+    // the flag flips and the cover underneath keeps its own colours.
+    flagContext.filter = this.invert() ? 'invert(1)' : 'none';
     flagContext.drawImage(image, 0, 0, width, height);
+    flagContext.filter = 'none';
     flagContext.globalCompositeOperation = 'destination-in';
     flagContext.drawImage(this.maskCanvas, 0, 0, width, height);
     flagContext.globalCompositeOperation = 'source-over';

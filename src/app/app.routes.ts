@@ -22,6 +22,19 @@ export const routes: Routes = [
     title: 'Scratch & Guess — FlagReveal',
   },
   {
+    path: 'play/inverted',
+    loadComponent: () => import('./features/reveal/reveal-page').then((m) => m.RevealPage),
+    title: 'Inverted Reveal — FlagReveal',
+    // Same page and rules as Colour Reveal; the data is what makes it inverted.
+    data: {
+      inverted: true,
+      title: 'Inverted Reveal',
+      subtitle: 'Every colour is its opposite',
+      accent: '#22d3a6',
+      shareRoute: 'play/inverted',
+    },
+  },
+  {
     path: 'play/mosaic',
     loadComponent: () => import('./features/mosaic/mosaic-page').then((m) => m.MosaicPage),
     title: 'Mosaic Ladder — FlagReveal',

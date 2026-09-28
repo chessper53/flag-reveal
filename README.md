@@ -14,6 +14,10 @@ pointer. You start at 1000 points and every press you rub costs about one, so
 the game is how early you dare to guess. Played in sessions of three flags, for
 a combined score out of 3000.
 
+**Inverted Reveal** — Colour Reveal with the picture flipped. The board paints
+the flag's negative, so France's blue arrives as orange and its red as cyan.
+Matching still runs on the real colours; the inverting happens in your head.
+
 **Mosaic Ladder** — the hard one. The flag is drawn as two enormous blocks and
 sharpens one rung per wrong guess (2 → 3 → 5 → 8 → 12 blocks), never far enough
 to be readable. Every one of the 197 countries can come up.

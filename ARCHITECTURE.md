@@ -131,6 +131,7 @@ They differ only in what makes a cell visible:
 | Reveal  | `guess.families[i] === answer.families[i]` | 5 attempts, win or lose                                         |
 | Scratch | the pointer passed within the brush radius | `1000 × (1 − rubbed) × multiplier`, multiplier `1 / 0.7 / 0.45` |
 | Mosaic  | nothing is hidden; the flag is *blurred*   | 5 attempts, win or lose                                         |
+| Inverted | as Reveal — the difference is painting only | 5 attempts, win or lose                                        |
 
 Mosaic is the odd one out and worth understanding before extending it. It
 hides nothing — the whole flag is on screen from the first second — so it uses
@@ -151,10 +152,32 @@ guesses, status) and the session (`sessionRounds`, `sessionTotal`,
 A session is the number players compare, so the session total (not a single
 round) is what `StatsService.recordSession()` keeps as a personal best.
 
+### Variants: one page, two modes
+
+Inverted Reveal is Colour Reveal with a different paint job — identical rules,
+five guesses, same matching. Rather than copying the engine and page, it is a
+variant:
+
+- `InvertedRevealGameService` **subclasses** `RevealGameService` and overrides
+  only `modeId`. It is a separate `providedIn: 'root'` class, so it gets its
+  own instance and therefore its own stats, streak and seeded sequence, while
+  the rules live in exactly one place.
+- `RevealPage` reads `RevealRouteData` from `route.snapshot.data` for its
+  title, accent, share route and the `inverted` flag, picking its engine from
+  that. The route in `app.routes.ts` is what makes the mode.
+
+Adding another Reveal-shaped variant (say, a greyscale one) is a route entry
+plus a two-line service — no new page. Anything that changes the *rules*, on
+the other hand, deserves its own engine.
+
 ### `FlagBoard` — the playfield
 
 Purely presentational: it takes a `flagUrl` and a `mask` and emits `scratch`
 events in **cell coordinates**, leaving the page to decide what that means.
+
+`invert` paints the flag's negative via a canvas filter applied while the
+artwork is drawn — before the mask is composited, so the cover underneath keeps
+its own colours and hidden cells still read as hidden.
 
 It has two render paths. With `mosaicColumns` set it downsamples the flag to
 that many blocks (smoothing **on**, so each block is the honest average of the

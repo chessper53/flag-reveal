@@ -1,9 +1,13 @@
 /**
- * Colour Reveal page.
+ * Colour Reveal page — and, with `inverted: true` in its route data, Inverted
+ * Reveal as well.
  *
- * Thin shell over {@link RevealGameService}: it renders the board, feeds
- * guesses in, and owns the keyboard contract — type, Enter to guess, Enter
- * again to start the next round.
+ * The two modes differ only in which engine instance they drive and whether
+ * the board paints the flag's negative, so they share this shell rather than
+ * keeping two near-identical copies of the guessing flow in sync.
+ *
+ * Thin over the engine: it renders the board, feeds guesses in, and owns the
+ * keyboard contract — type, Enter to guess, Enter again for the next round.
  */
 
 import {
@@ -30,11 +34,21 @@ import {
   copyText,
 } from '../../core/util/share-link';
 import { GuessRejection, REVEAL_MAX_ATTEMPTS, RoundStatus } from '../../core/models/game.model';
+import { InvertedRevealGameService } from '../../core/services/inverted-reveal-game.service';
 import { RevealGameService } from '../../core/services/reveal-game.service';
 import { CountryPicker } from '../../shared/country-picker/country-picker';
 import { FlagBoard } from '../../shared/flag-board/flag-board';
 import { Icon } from '../../shared/icon/icon';
 import { ResultBanner } from '../../shared/result-banner/result-banner';
+
+/** What the route supplies to tell the two variants apart. */
+interface RevealRouteData {
+  readonly inverted?: boolean;
+  readonly title?: string;
+  readonly subtitle?: string;
+  readonly accent?: string;
+  readonly shareRoute?: string;
+}
 
 @Component({
   selector: 'app-reveal-page',
@@ -42,18 +56,30 @@ import { ResultBanner } from '../../shared/result-banner/result-banner';
   imports: [RouterLink, FlagBoard, CountryPicker, ResultBanner, Icon],
   templateUrl: './reveal-page.html',
   styleUrl: './reveal-page.scss',
+  // The accent recolours every control on the page, so each variant sets it.
+  host: { '[style.--accent]': 'variant.accent ?? "#4f9cf9"' },
 })
 export class RevealPage implements OnInit {
-  protected readonly game = inject(RevealGameService);
+  private readonly route = inject(ActivatedRoute);
+
+  /** Route-supplied configuration; empty for plain Colour Reveal. */
+  protected readonly variant: RevealRouteData = this.route.snapshot.data;
+
+  /**
+   * Each variant gets its own engine instance, so their stats, streaks and
+   * seeded sequences stay independent.
+   */
+  protected readonly game = this.variant.inverted
+    ? inject(InvertedRevealGameService)
+    : inject(RevealGameService);
+
   protected readonly RoundStatus = RoundStatus;
   protected readonly maxAttempts = REVEAL_MAX_ATTEMPTS;
 
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly countries = inject(CountryService);
   protected readonly settings = inject(SettingsService);
 
-  /** Transient message under the input ("already guessed", "no such country"). */
   /**
    * Artwork for the board. Only set once the answer's grid is rasterised, so
    * the board never shows the flag before the round is ready to play.
@@ -146,7 +172,8 @@ export class RevealPage implements OnInit {
   /** Copies a link that reproduces exactly what was just played. */
   protected async onShare(): Promise<void> {
     const { seed, index } = this.game.challenge;
-    const link = buildShareLink('play/reveal', seed, index, this.settings.hardMode());
+    const route = this.variant.shareRoute ?? 'play/reveal';
+    const link = buildShareLink(route, seed, index, this.settings.hardMode());
     const copied = await copyText(link);
     // A blocked clipboard is not a dead end: the address bar holds the link.
     this.shareLabel.set(copied ? 'Link copied!' : 'Copy from the address bar');

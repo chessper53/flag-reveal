@@ -17,6 +17,8 @@ export enum GameModeId {
   Scratch = 'scratch',
   /** The flag as a coarse mosaic that sharpens one step per wrong guess. */
   Mosaic = 'mosaic',
+  /** Colour Reveal, but the board paints the flag's negative. */
+  Inverted = 'inverted',
 }
 
 /** Menu metadata for a mode. */

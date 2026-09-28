@@ -2,11 +2,13 @@
   <header class="page__bar">
     <a class="btn btn--ghost" routerLink="/"><app-icon name="back" /> Menu</a>
     <div class="page__titles">
-      <h1 class="page__title">Colour Reveal</h1>
+      <h1 class="page__title">{{ variant.title ?? 'Colour Reveal' }}</h1>
       @if (settings.hardMode()) {
         <span class="page__badge">Hard</span>
       }
-      <p class="page__subtitle">Matching colours stay on the board</p>
+      <p class="page__subtitle">
+        {{ variant.subtitle ?? 'Matching colours stay on the board' }}
+      </p>
     </div>
     <button class="btn btn--ghost" type="button" (click)="playAgain()">
       <app-icon name="refresh" /> Skip
@@ -18,6 +20,7 @@
       <app-flag-board
         [flagUrl]="flagUrl()"
         [mask]="game.mask()"
+        [invert]="variant.inverted === true"
         coverStyle="grid"
         label="Hidden flag, revealed where your guesses matched"
       />

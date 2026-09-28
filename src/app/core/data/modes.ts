@@ -33,6 +33,17 @@ export const GAME_MODES: readonly GameModeDescriptor[] = [
     accent: '#f5b544',
   },
   {
+    id: GameModeId.Inverted,
+    title: 'Inverted Reveal',
+    tagline: 'Negative · 5 guesses',
+    description:
+      "Colour Reveal with the picture flipped: the flag is painted as its own negative, so France's blue arrives as orange and its red as cyan. Matching still works on the real colours — you just have to invert it in your head.",
+    icon: 'invert',
+    route: '/play/inverted',
+    available: true,
+    accent: '#22d3a6',
+  },
+  {
     id: GameModeId.Mosaic,
     title: 'Mosaic Ladder',
     tagline: 'Hard · 5 guesses',
